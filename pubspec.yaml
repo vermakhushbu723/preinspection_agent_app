@@ -1,0 +1,84 @@
+name: preinspection_agent_app
+description: "Pre-Inspection Agent app -- PreinspectionAgent flow (Flutter port of the web portal)."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State management
+  flutter_riverpod: ^2.6.1
+
+  # Routing
+  go_router: ^14.6.2
+
+  # Native device features
+  camera: ^0.11.1
+  geolocator: ^13.0.2
+  permission_handler: ^11.3.1
+  video_player: ^2.9.2
+  image_picker: ^1.1.2
+  path_provider: ^2.1.5
+  path: ^1.9.0
+
+  # Persistence (mirrors the web app's sessionStorage persistence)
+  shared_preferences: ^2.3.3
+
+  # Assets / formatting
+  flutter_svg: ^2.0.16
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+  # Generate the native app icon (flutter_launcher_icons) and native splash
+  # screen (flutter_native_splash) from assets/icons/. Both are build-time
+  # tools -- they write into android/, ios/ when their `dart run` command is
+  # invoked (see README.md), not runtime dependencies of the app itself.
+  flutter_launcher_icons: ^0.14.3
+  flutter_native_splash: ^2.4.6
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/icons/
+    - assets/images/logos/
+    - assets/images/vehicles/car/
+    - assets/images/vehicles/bike/
+    - assets/images/vehicles/truck/
+    - assets/images/instruction_bg/
+
+# App icon (phone home screen, after install) -- run
+# `dart run flutter_launcher_icons` after changing assets/icons/app_icon.jpeg.
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon.jpeg"
+
+# Native splash screen shown on cold start, before Flutter draws its first
+# frame -- replaces the default blank-white Flutter launch screen. Run
+# `dart run flutter_native_splash:create` after changing
+# assets/icons/splace_screen.png.
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/icons/splace_screen.png
+  android_12:
+    # Android 12+ masks the splash into a circle, so it needs its own square,
+    # padded artwork instead of the wide horizontal lockup.
+    image: tool/splash/splash_android12.png
+    icon_background_color: "#FFFFFF"
+    color: "#FFFFFF"
+  android: true
+  ios: true
+  web: false
