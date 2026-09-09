@@ -3,6 +3,13 @@
 enum VehicleCategory { car, bike, truck }
 
 extension VehicleCategoryX on VehicleCategory {
+  /// Human-readable name, used in the photo-guide heading.
+  String get displayName => switch (this) {
+    VehicleCategory.car => 'Private Car',
+    VehicleCategory.bike => 'Two Wheeler',
+    VehicleCategory.truck => 'Commercial Vehicle',
+  };
+
   String get assetFolder => switch (this) {
     VehicleCategory.car => 'car',
     VehicleCategory.bike => 'bike',

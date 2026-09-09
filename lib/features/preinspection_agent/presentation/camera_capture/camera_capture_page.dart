@@ -59,6 +59,13 @@ class _CameraCapturePageState extends ConsumerState<CameraCapturePage> {
   /// free-form close-ups, unlike the fixed 360-degree angles.
   bool get _isDamageShot => widget.angle.contains('damage');
 
+  /// Only the fixed 360-degree angles get the silhouette guide (and the
+  /// landscape lock that goes with framing a whole vehicle). Damage shots
+  /// and the "add others photos" close-ups -- dashboard, open hood, tyre
+  /// numbers, under body, selfie -- are shot portrait with a plain
+  /// viewfinder.
+  bool get _hasGuide => !_isDamageShot && VehicleAssets.isGuidedAngle(_baseAngle);
+
   /// `front-side` -> `Front Side`. Port of `formatAngleName` in
   /// `CameraCapturePage.jsx`.
   String get _formattedAngle => widget.angle
@@ -70,13 +77,13 @@ class _CameraCapturePageState extends ConsumerState<CameraCapturePage> {
   void initState() {
     super.initState();
     // The 360-degree angles frame a whole vehicle, so they need landscape.
-    // Damage close-ups don't -- and forcing landscape for them stranded the
-    // app sideways after the shot (the page underneath had already locked
+    // Close-ups don't -- and forcing landscape for them stranded the app
+    // sideways after the shot (the page underneath had already locked
     // portrait in its own initState, which never re-runs on pop).
-    if (_isDamageShot) {
-      AppOrientation.lockPortrait();
-    } else {
+    if (_hasGuide) {
       AppOrientation.lockLandscape();
+    } else {
+      AppOrientation.lockPortrait();
     }
     _init();
   }
@@ -148,8 +155,9 @@ class _CameraCapturePageState extends ConsumerState<CameraCapturePage> {
                     ? _PreviewView(path: _capturedPath!, onRetake: _retake, onSave: _save)
                     : _LiveView(
                         controller: _controller!,
-                        guideAsset:
-                            _isDamageShot ? null : VehicleAssets.angleImage(category, _baseAngle),
+                        guideAsset: _hasGuide
+                            ? VehicleAssets.angleImage(category, _baseAngle)
+                            : null,
                         angleLabel: _formattedAngle,
                         position: _position,
                         now: _now,

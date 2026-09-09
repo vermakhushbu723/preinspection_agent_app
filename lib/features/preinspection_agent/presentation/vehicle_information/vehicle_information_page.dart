@@ -151,7 +151,7 @@ class _VehicleInformationPageState extends ConsumerState<VehicleInformationPage>
                   value: flow.customerSignature,
                   onChanged: (bytes) => ref.read(claimFlowProvider.notifier).setCustomerSignature(bytes),
                   declarationLabel: 'Customer Declaration',
-                  onDeclarationTap: () => context.go(AppRoutes.customerDeclaration),
+                  onDeclarationTap: () => context.push(AppRoutes.customerDeclaration),
                 ),
                 _SignatureSection(
                   title: 'Inspection agent signature',
@@ -163,7 +163,7 @@ class _VehicleInformationPageState extends ConsumerState<VehicleInformationPage>
                   value: flow.inspectorSignature,
                   onChanged: (bytes) => ref.read(claimFlowProvider.notifier).setInspectorSignature(bytes),
                   declarationLabel: 'Inspector Declaration',
-                  onDeclarationTap: () => context.go(AppRoutes.inspectorDeclaration),
+                  onDeclarationTap: () => context.push(AppRoutes.inspectorDeclaration),
                 ),
                 _Card(
                   padding: const EdgeInsets.all(18),
@@ -342,7 +342,7 @@ class _RecommendationRadio extends StatelessWidget {
   }
 }
 
-class _SignatureSection extends StatelessWidget {
+class _SignatureSection extends StatefulWidget {
   const _SignatureSection({
     required this.title,
     required this.subtitle,
@@ -368,6 +368,28 @@ class _SignatureSection extends StatelessWidget {
   final VoidCallback onDeclarationTap;
 
   @override
+  State<_SignatureSection> createState() => _SignatureSectionState();
+}
+
+class _SignatureSectionState extends State<_SignatureSection> {
+  final _padController = SignaturePadController();
+
+  void _clear() {
+    _padController.clear();
+    widget.onChanged(null);
+  }
+
+  Future<void> _save() async {
+    final bytes = await _padController.export();
+    if (!mounted) return;
+    if (_padController.isEmpty || bytes == null) return;
+    widget.onChanged(bytes);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Signature saved'), duration: Duration(seconds: 2)),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return _Card(
       child: Column(
@@ -379,21 +401,21 @@ class _SignatureSection extends StatelessWidget {
               Container(
                 width: 36,
                 height: 36,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: iconBg),
-                child: Icon(icon, size: 18, color: iconColor),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: widget.iconBg),
+                child: Icon(widget.icon, size: 18, color: widget.iconColor),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                    Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    Text(widget.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                    Text(widget.subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                   ],
                 ),
               ),
               TextButton(
-                onPressed: () => onChanged(null),
+                onPressed: _padController.undo,
                 style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
                 child: const Text('Undo', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
               ),
@@ -402,17 +424,24 @@ class _SignatureSection extends StatelessWidget {
           const SizedBox(height: 12),
           Stack(
             children: [
-              SignaturePad(value: value, onChanged: onChanged, height: 132, showClearButton: false, enabled: accepted),
-              if (!accepted)
+              SignaturePad(
+                value: widget.value,
+                onChanged: widget.onChanged,
+                controller: _padController,
+                height: 132,
+                showClearButton: false,
+                enabled: widget.accepted,
+              ),
+              if (!widget.accepted)
                 Positioned.fill(
                   child: GestureDetector(
-                    onTap: onDeclarationTap,
+                    onTap: widget.onDeclarationTap,
                     child: Container(
                       decoration: BoxDecoration(color: const Color(0xE0F1F5F9), borderRadius: BorderRadius.circular(8)),
                       alignment: Alignment.center,
                       padding: const EdgeInsets.all(12),
                       child: Text(
-                        'Accept the $declarationLabel to sign here',
+                        'Accept the ${widget.declarationLabel} to sign here',
                         textAlign: TextAlign.center,
                         style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                       ),
@@ -427,19 +456,19 @@ class _SignatureSection extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
-                  onPressed: onDeclarationTap,
+                  onPressed: widget.onDeclarationTap,
                   style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
-                  child: Text(declarationLabel, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF2563EB))),
+                  child: Text(widget.declarationLabel, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF2563EB))),
                 ),
                 GestureDetector(
-                  onTap: onDeclarationTap,
+                  onTap: widget.onDeclarationTap,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       SizedBox(
                         width: 18,
                         height: 18,
-                        child: Checkbox(value: accepted, onChanged: null, materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                        child: Checkbox(value: widget.accepted, onChanged: null, materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
                       ),
                       const SizedBox(width: 8),
                       const Text('I Agree', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
@@ -455,7 +484,7 @@ class _SignatureSection extends StatelessWidget {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => onChanged(null),
+                    onPressed: _clear,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFE5F2FF),
                       foregroundColor: const Color(0xFF0D6EFD),
@@ -469,7 +498,7 @@ class _SignatureSection extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: value != null ? () => onChanged(value) : null,
+                    onPressed: widget.accepted ? _save : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.btnPrimary,
                       disabledBackgroundColor: AppColors.btnPrimary.withValues(alpha: 0.6),

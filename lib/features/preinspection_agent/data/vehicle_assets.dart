@@ -88,4 +88,14 @@ class VehicleAssets {
   static bool isAngleSupported(VehicleCategory category, String angleId) {
     return _angleFiles[category]?[angleId] != null;
   }
+
+  /// Whether [angleId] is one of the fixed 360-degree capture points, i.e.
+  /// a shot the user is meant to frame a whole vehicle in.
+  ///
+  /// The "add others photos" slots (`dashboard`, `open-hood`, `tyre-2`,
+  /// `front-under-body`, …) are close-ups of one part, so overlaying a
+  /// whole-car silhouette on the viewfinder only got in the way — this is
+  /// what keeps that overlay off those shots.
+  static bool isGuidedAngle(String angleId) =>
+      angleId != 'video' && _angleFiles[VehicleCategory.car]!.containsKey(angleId);
 }

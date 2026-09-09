@@ -23,10 +23,11 @@ class InsurerBranding {
 
   /// The insurer this build is tied up with. Swap this (or point it at
   /// [none]) per deployment; nothing else needs to change.
-  static const InsurerBranding current = InsurerBranding(
-    name: 'New India Assurance Co. Ltd.',
-    logoAsset: 'assets/images/logos/partner_logo.png',
-  );
+  ///
+  /// The preinspection app ships with no tie-up: the header shows the IBima
+  /// Assist logo alone. Point this back at an [InsurerBranding] with a name
+  /// and logo to bring partner branding back.
+  static const InsurerBranding current = none;
 
   bool get hasLogo => logoAsset != null;
   bool get hasName => name != null && name!.isNotEmpty;

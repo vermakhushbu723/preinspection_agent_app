@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../../core/routing/app_back.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../state/claim_flow_provider.dart';
 
@@ -28,7 +28,10 @@ class _InspectorDeclarationPageState extends ConsumerState<InspectorDeclarationP
 
   void _continue() {
     ref.read(claimFlowProvider.notifier).setInspectorDeclarationAccepted(true);
-    context.go(AppRoutes.vehicleInformation);
+    // Pop rather than replace: Vehicle Information stays mounted
+    // underneath, so returning lands on the same scroll position
+    // (and signature) the agent left.
+    appBack(context, AppRoutes.vehicleInformation);
   }
 
   @override

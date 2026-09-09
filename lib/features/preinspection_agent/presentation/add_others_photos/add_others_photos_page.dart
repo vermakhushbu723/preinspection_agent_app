@@ -131,39 +131,27 @@ class _AddOthersPhotosPageState extends ConsumerState<AddOthersPhotosPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(card.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF9CA3AF))),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            for (final slot in card.slots)
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 6),
-                                  child: GestureDetector(
-                                    onTap: () => _capture(slot.key),
-                                    child: AspectRatio(
-                                      aspectRatio: card.slots.length > 1 ? 1 : 16 / 9,
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(6),
-                                        child: photos.containsKey(slot.key)
-                                            ? Image.file(File(photos[slot.key]!), fit: BoxFit.cover)
-                                            : Opacity(
-                                                opacity: 0.4,
-                                                child: Image.asset(
-                                                  slot.bg,
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder: (_, _, _) => Container(color: const Color(0xFFE5E7EB)),
-                                                ),
-                                              ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
+                        Text(
+                          card.title,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
-                        const SizedBox(height: 8),
-                        BottomButton(label: 'Capture', onPressed: () => _capture(_nextSlotKey(card, photos))),
+                        const SizedBox(height: 10),
+                        for (var i = 0; i < card.slots.length; i++)
+                          _SlotRow(
+                            slot: card.slots[i],
+                            index: card.slots.length > 1 ? i + 1 : null,
+                            capturedPath: photos[card.slots[i].key],
+                            onTap: () => _capture(card.slots[i].key),
+                          ),
+                        const SizedBox(height: 4),
+                        BottomButton(
+                          label: 'Capture',
+                          onPressed: () => _capture(_nextSlotKey(card, photos)),
+                        ),
                       ],
                     ),
                   ),
@@ -176,6 +164,118 @@ class _AddOthersPhotosPageState extends ConsumerState<AddOthersPhotosPage> {
               color: Colors.white.withValues(alpha: 0.95),
               padding: const EdgeInsets.all(16),
               child: BottomButton(label: 'Next', onPressed: _next),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+/// One capture slot: the sample/guide shot on the left (small, and shown at
+/// full opacity — it used to be blown up to card width and faded to 40%,
+/// which made it read as a broken photo), and the agent's own photo for that
+/// slot beside it.
+class _SlotRow extends StatelessWidget {
+  const _SlotRow({
+    required this.slot,
+    required this.index,
+    required this.capturedPath,
+    required this.onTap,
+  });
+
+  final _Slot slot;
+
+  /// 1-based position, only for cards with more than one slot (tyres,
+  /// windshield) so the rows can be told apart.
+  final int? index;
+  final String? capturedPath;
+  final VoidCallback onTap;
+
+  static const double _thumbWidth = 104;
+  static const double _thumbHeight = 78;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: _thumbWidth,
+                height: _thumbHeight,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: Image.asset(
+                    slot.bg,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => Container(color: const Color(0xFFE5E7EB)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              SizedBox(
+                width: _thumbWidth,
+                child: Text(
+                  index == null ? 'Sample' : 'Sample $index',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: GestureDetector(
+              onTap: onTap,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    height: _thumbHeight,
+                    child: capturedPath != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Image.file(File(capturedPath!), fit: BoxFit.cover),
+                          )
+                        : DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: const Color(0xFF93C5FD)),
+                            ),
+                            child: const Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.photo_camera_outlined, size: 20, color: AppColors.primary),
+                                SizedBox(height: 4),
+                                Text(
+                                  'Tap to capture',
+                                  style: TextStyle(fontSize: 11, color: AppColors.primary),
+                                ),
+                              ],
+                            ),
+                          ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    capturedPath != null ? 'Your photo' : 'Not captured yet',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: capturedPath != null ? FontWeight.w600 : FontWeight.normal,
+                      color: capturedPath != null
+                          ? AppColors.statusCompleted
+                          : AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

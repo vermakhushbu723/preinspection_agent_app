@@ -12,7 +12,7 @@ the web URLs so the two apps stay easy to compare.
 ```bash
 flutter pub get
 flutter run          # device / emulator (camera + location need a real device)
-flutter test         # 19 tests, includes a "every route resolves" router test
+flutter test         # 23 tests: route resolution, signature pad, doc-upload status, validators
 flutter analyze
 ```
 
@@ -103,6 +103,29 @@ path to `AppRoutes`, and register it in `createAppRouter()`.
   Photos*.
 - **Vehicle Information** — submitting returns to the dashboard.
 
-One deliberate deviation from the web app: the document-upload badge reads
-Submitted/Pending from the real capture state instead of the static
-`required` flag, so a document only shows Submitted once its images are saved.
+## Deliberate deviations from the web app
+
+These are places the Flutter app improves on the reference rather than
+copying it:
+
+- **Document upload** — the badge reads Submitted/Pending from the real
+  capture state instead of the static `required` flag, so a document only
+  shows Submitted once its images are saved.
+- **Photo Capture Selection** — restyled as a "photo guide" board: a titled
+  blue header, eight numbered markers wired to the vehicle by leader lines,
+  and odometer / chassis number / walk-around video as cards in a strip along
+  the bottom (they are close-ups, not positions around the car).
+- **Add Others Photos** — the sample shot for each slot is small and shown at
+  full opacity, with the agent's own photo for that slot beside it; it used to
+  be a card-width image faded to 40%, which read as a broken photo.
+- **Camera capture** — the whole-car silhouette overlay (and the landscape
+  lock) applies only to the eight 360-degree angles. Close-ups — dashboard,
+  open hood, tyre numbers, under body, selfie — get a plain portrait
+  viewfinder.
+- **Signatures** — the pad claims the pointer outright, so a stroke is never
+  swallowed by the surrounding scroll view, and Clear/Undo actually wipe the
+  ink (see `test/core/signature_pad_test.dart`). The declaration screens are
+  pushed and popped, so returning lands on the same scroll position.
+- **Branding** — `InsurerBranding.current` is `none`, so the header carries
+  the IBima Assist logo alone; point it at a named `InsurerBranding` to bring
+  partner branding back.

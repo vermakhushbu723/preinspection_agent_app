@@ -36,13 +36,20 @@ class ClaimStartPage extends StatelessWidget {
       body: Column(
         children: [
           const AppHeader(),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 12, 16, 12),
-            child: Text(
+          // The title is white text, so it has to sit ON the blue band (the
+          // web app puts it inside the header) — painted over the page
+          // background it was invisible. This container continues the
+          // header's blue so the two read as one band.
+          Container(
+            width: double.infinity,
+            color: AppColors.bgHeader,
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 14),
+            child: const Text(
               'Thank you for using risk inspection services',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 15,
+                fontSize: 16,
+                height: 1.3,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textWhite,
               ),
