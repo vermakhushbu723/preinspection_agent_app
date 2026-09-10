@@ -12,7 +12,7 @@ the web URLs so the two apps stay easy to compare.
 ```bash
 flutter pub get
 flutter run          # device / emulator (camera + location need a real device)
-flutter test         # 23 tests: route resolution, signature pad, doc-upload status, validators
+flutter test         # 24 tests: routes, login/session, signature pad, doc-upload status, validators
 flutter analyze
 ```
 
@@ -111,10 +111,13 @@ copying it:
 - **Document upload** — the badge reads Submitted/Pending from the real
   capture state instead of the static `required` flag, so a document only
   shows Submitted once its images are saved.
-- **Photo Capture Selection** — restyled as a "photo guide" board: a titled
-  blue header, eight numbered markers wired to the vehicle by leader lines,
-  and odometer / chassis number / walk-around video as cards in a strip along
-  the bottom (they are close-ups, not positions around the car).
+- **Photo Capture Selection** — restyled as a photo-guide board: eight
+  numbered markers spaced evenly around an ellipse (captions sit under each
+  marker so they cannot overlap), wired to a large vehicle image by leader
+  lines, with odometer / chassis number / walk-around video as cards in a
+  strip along the bottom. Each of those cards pairs the guide shot with the
+  agent's own capture. Every vehicle type gets a chassis-number card — the
+  two-wheeler folder ships no plate artwork, so it borrows the car's.
 - **Add Others Photos** — the sample shot for each slot is small and shown at
   full opacity, with the agent's own photo for that slot beside it; it used to
   be a card-width image faded to 40%, which read as a broken photo.
@@ -129,3 +132,9 @@ copying it:
 - **Branding** — `InsurerBranding.current` is `none`, so the header carries
   the IBima Assist logo alone; point it at a named `InsurerBranding` to bring
   partner branding back.
+- **Login & session** — the web app's two tabs pick a portal (Claim /
+  Pre-Inspection); this app *is* the preinspection portal, so its tabs pick
+  who is signing in — **Agent** or **Surveyor**. The chosen role and the id
+  typed on the form are held in `state/session_provider.dart`, and the
+  dashboard greets that id and shows its role instead of a hardcoded
+  workshop name.

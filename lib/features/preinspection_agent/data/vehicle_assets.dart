@@ -89,13 +89,32 @@ class VehicleAssets {
     return _angleFiles[category]?[angleId] != null;
   }
 
+  /// Guide art for a close-up slot (odometer, chassis number), falling back
+  /// to another category's artwork when this one doesn't ship it — a
+  /// two-wheeler has a chassis plate to photograph even though the bike
+  /// folder has no drawing of one.
+  static String closeUpImage(VehicleCategory category, String angleId) {
+    final own = _angleFiles[category]?[angleId];
+    if (own != null) return '${_basePath(category)}/$own';
+    final fallback = _angleFiles[VehicleCategory.car]![angleId];
+    if (fallback == null) return centerImage(category);
+    return '${_basePath(VehicleCategory.car)}/$fallback';
+  }
+
+  /// Slots that are a close-up of one part rather than a shot framing the
+  /// whole vehicle. These get a plain portrait viewfinder — a whole-vehicle
+  /// silhouette laid over an odometer or a chassis plate only gets in the way.
+  static const Set<String> _closeUpAngles = {'odometer', 'chassis-number'};
+
   /// Whether [angleId] is one of the fixed 360-degree capture points, i.e.
   /// a shot the user is meant to frame a whole vehicle in.
   ///
-  /// The "add others photos" slots (`dashboard`, `open-hood`, `tyre-2`,
-  /// `front-under-body`, …) are close-ups of one part, so overlaying a
-  /// whole-car silhouette on the viewfinder only got in the way — this is
-  /// what keeps that overlay off those shots.
+  /// The close-ups above and the "add others photos" slots (`dashboard`,
+  /// `open-hood`, `tyre-2`, `front-under-body`, …) are shots of one part, so
+  /// overlaying a whole-vehicle silhouette on the viewfinder only got in the
+  /// way — this is what keeps that overlay off those shots.
   static bool isGuidedAngle(String angleId) =>
-      angleId != 'video' && _angleFiles[VehicleCategory.car]!.containsKey(angleId);
+      angleId != 'video' &&
+      !_closeUpAngles.contains(angleId) &&
+      _angleFiles[VehicleCategory.car]!.containsKey(angleId);
 }

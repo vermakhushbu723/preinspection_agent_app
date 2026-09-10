@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_routes.dart';
@@ -7,18 +8,19 @@ import '../../../../core/widgets/app_header.dart';
 import '../../../../core/widgets/claim_list_card.dart';
 import '../../data/demo_claims.dart';
 import '../../domain/models/claim.dart';
+import '../../state/session_provider.dart';
 
 enum _DashboardView { total, completed, pending, search }
 
 /// Port of `DashboardPage.jsx`.
-class DashboardPage extends StatefulWidget {
+class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
 
   @override
-  State<DashboardPage> createState() => _DashboardPageState();
+  ConsumerState<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> {
+class _DashboardPageState extends ConsumerState<DashboardPage> {
   _DashboardView _view = _DashboardView.total;
   final _searchController = TextEditingController();
   String _query = '';
@@ -101,6 +103,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     final claims = _filteredClaims;
+    final session = ref.watch(sessionProvider);
 
     return Scaffold(
       body: Column(
@@ -111,25 +114,64 @@ class _DashboardPageState extends State<DashboardPage> {
               color: AppColors.bgHeader,
               child: Column(
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text.rich(
-                        TextSpan(
-                          text: 'Welcome ',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-                          children: [
-                            TextSpan(
-                              text: 'XYZ Automobiles',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                decoration: TextDecoration.underline,
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text.rich(
+                                TextSpan(
+                                  text: 'Welcome ',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      // The signed-in id, not a hardcoded
+                                      // workshop name -- this portal is used
+                                      // by agents and surveyors alike.
+                                      text: session?.userId ?? 'Guest',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (session != null)
+                                Text(
+                                  session.role.displayName,
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        if (session != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              session.role.shortLabel,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
+                          ),
+                      ],
                     ),
                   ),
                   Expanded(

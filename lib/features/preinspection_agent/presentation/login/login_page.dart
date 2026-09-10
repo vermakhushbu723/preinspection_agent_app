@@ -1,13 +1,13 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bottom_button.dart';
-
-enum _LoginTab { claim, preInspection }
+import '../../state/session_provider.dart';
 
 String _generateCaptcha() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
@@ -16,15 +16,20 @@ String _generateCaptcha() {
 }
 
 /// Port of `LoginPage.jsx`.
-class LoginPage extends StatefulWidget {
+///
+/// The web app's two tabs pick a portal (Claim / Pre-Inspection); this app IS
+/// the preinspection portal, so its tabs pick who is signing in instead --
+/// an agent or a surveyor -- and every screen after login says whose id it
+/// is working under (see [sessionProvider]).
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  _LoginTab _activeTab = _LoginTab.claim;
+class _LoginPageState extends ConsumerState<LoginPage> {
+  UserRole _activeTab = UserRole.agent;
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _captchaController = TextEditingController();
@@ -74,6 +79,9 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
+    // Remember who signed in -- the dashboard greets this id by name and
+    // says whether it belongs to an agent or a surveyor.
+    ref.read(sessionProvider.notifier).signIn(userId: username, role: _activeTab);
     context.go(AppRoutes.dashboard);
   }
 
@@ -105,21 +113,21 @@ class _LoginPageState extends State<LoginPage> {
                                 children: [
                                   Expanded(
                                     child: _TabButton(
-                                      label: 'Claim',
+                                      label: 'Agent',
                                       color: const Color(0xFFDB6F37),
                                       shadowColor: const Color(0x66E07B39),
-                                      selected: _activeTab == _LoginTab.claim,
-                                      onTap: () => setState(() => _activeTab = _LoginTab.claim),
+                                      selected: _activeTab == UserRole.agent,
+                                      onTap: () => setState(() => _activeTab = UserRole.agent),
                                     ),
                                   ),
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: _TabButton(
-                                      label: 'Pre-Inspection',
+                                      label: 'Surveyor',
                                       color: const Color(0xFF4643F9),
                                       shadowColor: const Color(0x664F46E5),
-                                      selected: _activeTab == _LoginTab.preInspection,
-                                      onTap: () => setState(() => _activeTab = _LoginTab.preInspection),
+                                      selected: _activeTab == UserRole.surveyor,
+                                      onTap: () => setState(() => _activeTab = UserRole.surveyor),
                                     ),
                                   ),
                                 ],
