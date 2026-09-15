@@ -89,18 +89,6 @@ class VehicleAssets {
     return _angleFiles[category]?[angleId] != null;
   }
 
-  /// Guide art for a close-up slot (odometer, chassis number), falling back
-  /// to another category's artwork when this one doesn't ship it — a
-  /// two-wheeler has a chassis plate to photograph even though the bike
-  /// folder has no drawing of one.
-  static String closeUpImage(VehicleCategory category, String angleId) {
-    final own = _angleFiles[category]?[angleId];
-    if (own != null) return '${_basePath(category)}/$own';
-    final fallback = _angleFiles[VehicleCategory.car]![angleId];
-    if (fallback == null) return centerImage(category);
-    return '${_basePath(VehicleCategory.car)}/$fallback';
-  }
-
   /// Slots that are a close-up of one part rather than a shot framing the
   /// whole vehicle. These get a plain portrait viewfinder — a whole-vehicle
   /// silhouette laid over an odometer or a chassis plate only gets in the way.

@@ -178,14 +178,14 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
                   ),
                   _Field(
                     label: 'Owner Name',
-                    placeholder: 'Naman Singh',
+                    placeholder: 'Enter owner name',
                     controller: _ownerNameController,
                     error: _errors['ownerName'],
                     inputFormatterAllowed: Validators.isLettersOnly,
                   ),
                   _Field(
                     label: 'Mobile Number',
-                    placeholder: '9910476839',
+                    placeholder: 'Enter mobile number',
                     controller: _mobileController,
                     error: _errors['mobile'],
                     keyboardType: TextInputType.phone,
@@ -195,14 +195,14 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
                   ),
                   _Field(
                     label: 'Email ID',
-                    placeholder: 'UserName@gmail.com',
+                    placeholder: 'Enter email address',
                     controller: _emailController,
                     error: _errors['email'],
                     keyboardType: TextInputType.emailAddress,
                   ),
                   _Field(
                     label: 'Odometer Reading ( KM )',
-                    placeholder: '9000',
+                    placeholder: 'Enter odometer reading',
                     controller: _odometerController,
                     error: _errors['odometer'],
                     keyboardType: TextInputType.number,
@@ -210,7 +210,7 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
                   ),
                   _Field(
                     label: 'Registration Number',
-                    placeholder: 'MH 49 DS 2345',
+                    placeholder: 'Enter registration number',
                     controller: _regNoController,
                     error: _errors['registrationNumber'],
                     inputFormatterAllowed: Validators.isPlateChar,
@@ -218,7 +218,7 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
                   ),
                   _DropdownField(
                     label: 'Select State',
-                    placeholder: 'Maharashtra',
+                    placeholder: 'Select state',
                     value: _state,
                     items: _indianStates,
                     error: _errors['state'],
@@ -229,6 +229,7 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
                   ),
                   _DateField(
                     label: 'Registration Date',
+                    placeholder: 'Select registration date',
                     value: _registrationDate,
                     error: _errors['registrationDate'],
                     format: 'dd-MM-yyyy',
@@ -236,7 +237,7 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
                   ),
                   _DropdownField(
                     label: 'Select Product',
-                    placeholder: 'Private Car',
+                    placeholder: 'Select product',
                     value: _product,
                     items: _products,
                     error: _errors['product'],
@@ -247,7 +248,7 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
                   ),
                   _DropdownField(
                     label: 'Select Make',
-                    placeholder: 'Mahindra',
+                    placeholder: 'Select make',
                     value: _make,
                     items: _makes,
                     error: _errors['make'],
@@ -258,7 +259,7 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
                   ),
                   _DropdownField(
                     label: 'Select Model',
-                    placeholder: 'Scorpio-N',
+                    placeholder: 'Select model',
                     value: _model,
                     items: _models,
                     error: _errors['model'],
@@ -269,7 +270,7 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
                   ),
                   _DropdownField(
                     label: 'Select Variant',
-                    placeholder: 'Z2',
+                    placeholder: 'Select variant',
                     value: _variant,
                     items: _variants,
                     error: _errors['variant'],
@@ -280,6 +281,7 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
                   ),
                   _DateField(
                     label: 'Select Manufacturing Year',
+                    placeholder: 'Select manufacturing year',
                     value: _manufacturingYear,
                     error: _errors['manufacturingYear'],
                     format: 'MM-yyyy',
@@ -287,7 +289,7 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
                   ),
                   _DropdownField(
                     label: 'Owner Serial Number',
-                    placeholder: '2',
+                    placeholder: 'Select owner serial number',
                     value: _ownerSerialNumber,
                     items: _ownerSerialNumbers,
                     error: _errors['ownerSerialNumber'],
@@ -298,7 +300,7 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
                   ),
                   _Field(
                     label: 'Present Market Value (Estimated)/ IDV',
-                    placeholder: '99,999',
+                    placeholder: 'Enter present market value',
                     controller: _idvController,
                     error: _errors['idv'],
                     keyboardType: TextInputType.number,
@@ -467,10 +469,12 @@ class _DateField extends StatelessWidget {
     required this.value,
     required this.onTap,
     required this.format,
+    required this.placeholder,
     this.error,
   });
 
   final String label;
+  final String placeholder;
   final DateTime? value;
   final VoidCallback onTap;
   final String format;
@@ -498,7 +502,7 @@ class _DateField extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(text.isEmpty ? '' : text,
+                  Text(text.isEmpty ? placeholder : text,
                       style: TextStyle(fontSize: 14, color: text.isEmpty ? AppColors.textSecondary : AppColors.textPrimary)),
                   const Icon(Icons.calendar_today_outlined, size: 16, color: AppColors.textSecondary),
                 ],

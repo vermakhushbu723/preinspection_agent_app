@@ -14,6 +14,7 @@ import '../../domain/vehicle_category.dart';
 import '../../domain/workflow_option.dart';
 import '../../state/claim_flow_provider.dart';
 import '../../state/claim_flow_state.dart';
+import 'guide_thumbnails.dart';
 
 /// A numbered capture point on the ring around the vehicle.
 class _PhotoPoint {
@@ -147,7 +148,6 @@ class _PhotoCaptureSelectionPageState
               ),
             ),
             _ExtrasStrip(
-              category: category,
               flow: flow,
               onTapShot: (id) => id == 'video' ? _openVideo() : _openCamera(id),
               onNext: allDone
@@ -260,8 +260,8 @@ class _VehicleDiagram extends StatelessWidget {
                     child: Image.asset(
                       VehicleAssets.centerImage(category),
                       fit: BoxFit.contain,
-                      height: ih * 0.66,
-                      width: iw * 0.46,
+                      height: ih * 0.82,
+                      width: iw * 0.60,
                       errorBuilder: (_, _, _) =>
                           const Icon(Icons.directions_car, size: 96),
                     ),
@@ -460,13 +460,11 @@ class _MarkerCaption extends StatelessWidget {
 /// Each card pairs the guide shot with the agent's own capture for that slot.
 class _ExtrasStrip extends StatelessWidget {
   const _ExtrasStrip({
-    required this.category,
     required this.flow,
     required this.onTapShot,
     required this.onNext,
   });
 
-  final VehicleCategory category;
   final ClaimFlowState flow;
   final ValueChanged<String> onTapShot;
   final VoidCallback? onNext;
@@ -493,7 +491,6 @@ class _ExtrasStrip extends StatelessWidget {
                     id: shot.$1,
                     label: shot.$2,
                     caption: shot.$3,
-                    category: category,
                     capturedPath: shot.$1 == 'video'
                         ? flow.walkAroundVideoPath
                         : flow.photos[shot.$1],
@@ -530,7 +527,6 @@ class _ExtraCard extends StatelessWidget {
     required this.id,
     required this.label,
     required this.caption,
-    required this.category,
     required this.capturedPath,
     required this.onTap,
   });
@@ -538,13 +534,15 @@ class _ExtraCard extends StatelessWidget {
   final String id;
   final String label;
   final String caption;
-  final VehicleCategory category;
 
   /// The agent's own photo (or recorded video) for this slot, once taken.
   final String? capturedPath;
   final VoidCallback onTap;
 
-  static const double _thumbHeight = 46;
+  /// Deliberately short: this strip sits under the diagram, and every pixel
+  /// it gives back goes to the vehicle above it.
+  static const double _thumbHeight = 44;
+  static const double _thumbWidth = 74;
 
   bool get _done => capturedPath != null;
 
@@ -555,7 +553,7 @@ class _ExtraCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(7),
+        padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
@@ -563,115 +561,73 @@ class _ExtraCard extends StatelessWidget {
             color: _done ? const Color(0xFF86EFAC) : const Color(0xFFDBEAFE),
           ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Row(
-              children: [
-                Icon(
-                  _done ? Icons.check_circle : Icons.photo_camera,
-                  size: 14,
-                  color: color,
-                ),
-                const SizedBox(width: 5),
-                Expanded(
-                  child: Text(
-                    label,
+            // What a good shot of this slot looks like -- replaced by the
+            // agent's own photo once they have taken one.
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: SizedBox(
+                width: _thumbWidth,
+                height: _thumbHeight,
+                child: _done && id != 'video'
+                    ? Image.file(File(capturedPath!), fit: BoxFit.cover)
+                    : GuideThumbnail(id: id),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 22,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          color: color,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Icon(
+                          _done ? Icons.check : Icons.photo_camera,
+                          size: 13,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12.5,
+                            color: color,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _done ? 'Captured' : '($caption)',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12.5,
-                      color: color,
+                      fontSize: 10.5,
+                      color: _done
+                          ? const Color(0xFF16A34A)
+                          : AppColors.textSecondary,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 5),
-            // Guide shot on the left, the agent's own capture beside it.
-            Row(
-              children: [
-                Expanded(child: _guideThumb()),
-                const SizedBox(width: 6),
-                Expanded(child: _captureThumb()),
-              ],
-            ),
-            const SizedBox(height: 3),
-            Text(
-              _done ? 'Captured' : caption,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 10.5,
-                color: _done
-                    ? const Color(0xFF16A34A)
-                    : AppColors.textSecondary,
+                ],
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _guideThumb() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
-      child: SizedBox(
-        height: _thumbHeight,
-        child: id == 'video'
-            ? Container(
-                color: const Color(0xFFE0F2FE),
-                child: const Icon(
-                  Icons.play_circle_fill,
-                  color: Color(0xFF1D4ED8),
-                  size: 22,
-                ),
-              )
-            : Image.asset(
-                VehicleAssets.closeUpImage(category, id),
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) =>
-                    Container(color: const Color(0xFFE5E7EB)),
-              ),
-      ),
-    );
-  }
-
-  Widget _captureThumb() {
-    if (!_done) {
-      return Container(
-        height: _thumbHeight,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: const Color(0xFFBFDBFE)),
-        ),
-        child: const Icon(
-          Icons.add_a_photo_outlined,
-          size: 18,
-          color: AppColors.primary,
-        ),
-      );
-    }
-    // A recorded walk-around has no still to show, so it gets a badge instead.
-    if (id == 'video') {
-      return Container(
-        height: _thumbHeight,
-        decoration: BoxDecoration(
-          color: const Color(0xFFDCFCE7),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: const Icon(Icons.videocam, size: 20, color: Color(0xFF16A34A)),
-      );
-    }
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
-      child: SizedBox(
-        height: _thumbHeight,
-        child: Image.file(File(capturedPath!), fit: BoxFit.cover),
       ),
     );
   }
