@@ -83,16 +83,25 @@ class ClaimDetailModal extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Claim Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(
+                'Claim Details',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: status == 'Completed'
                       ? AppColors.statusCompleted
                       : AppColors.statusPending,
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: Text(status, style: const TextStyle(color: Colors.white, fontSize: 12)),
+                child: Text(
+                  status,
+                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                ),
               ),
             ],
           ),
@@ -103,8 +112,14 @@ class ClaimDetailModal extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(row.$1, style: const TextStyle(color: AppColors.textSecondary)),
-                  Text(row.$2, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(
+                    row.$1,
+                    style: const TextStyle(color: AppColors.textSecondary),
+                  ),
+                  Text(
+                    row.$2,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                 ],
               ),
             ),

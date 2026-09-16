@@ -55,7 +55,8 @@ class AddDamagePhotosPage extends ConsumerStatefulWidget {
   const AddDamagePhotosPage({super.key});
 
   @override
-  ConsumerState<AddDamagePhotosPage> createState() => _AddDamagePhotosPageState();
+  ConsumerState<AddDamagePhotosPage> createState() =>
+      _AddDamagePhotosPageState();
 }
 
 class _AddDamagePhotosPageState extends ConsumerState<AddDamagePhotosPage> {
@@ -71,12 +72,18 @@ class _AddDamagePhotosPageState extends ConsumerState<AddDamagePhotosPage> {
     AppOrientation.lockPortrait();
   }
 
-  List<MapEntry<String, String>> _photosForPrefix(Map<String, String> photos, String prefix) {
+  List<MapEntry<String, String>> _photosForPrefix(
+    Map<String, String> photos,
+    String prefix,
+  ) {
     return photos.entries.where((e) => e.key.startsWith(prefix)).toList();
   }
 
   Future<void> _addPhoto(String prefix) async {
-    final existing = _photosForPrefix(ref.read(claimFlowProvider).photos, prefix).length;
+    final existing = _photosForPrefix(
+      ref.read(claimFlowProvider).photos,
+      prefix,
+    ).length;
     final key = '$prefix-damage-${existing + 1}';
     await context.push(AppRoutes.cameraCapturePath(key));
     // Whatever the camera route did to the orientation, this page is portrait.
@@ -84,7 +91,9 @@ class _AddDamagePhotosPageState extends ConsumerState<AddDamagePhotosPage> {
   }
 
   Future<void> _addAdditionalPhoto(int nextIndex) async {
-    await context.push(AppRoutes.cameraCapturePath('additional-damage-$nextIndex'));
+    await context.push(
+      AppRoutes.cameraCapturePath('additional-damage-$nextIndex'),
+    );
     await AppOrientation.lockPortrait();
   }
 
@@ -105,10 +114,16 @@ class _AddDamagePhotosPageState extends ConsumerState<AddDamagePhotosPage> {
     final flow = ref.watch(claimFlowProvider);
     final photos = flow.photos;
     final category = flow.ownerVehicleDetails.vehicleCategory;
-    final additionalPhotos = photos.entries.where((e) => e.key.startsWith('additional-damage')).toList();
-    final completedCount = _sections.where((s) => _photosForPrefix(photos, s.prefix).isNotEmpty).length;
+    final additionalPhotos = photos.entries
+        .where((e) => e.key.startsWith('additional-damage'))
+        .toList();
+    final completedCount = _sections
+        .where((s) => _photosForPrefix(photos, s.prefix).isNotEmpty)
+        .length;
     final totalCount = _sections.length + 1;
-    final progress = totalCount == 0 ? 0 : ((completedCount / totalCount) * 100).round();
+    final progress = totalCount == 0
+        ? 0
+        : ((completedCount / totalCount) * 100).round();
 
     return Scaffold(
       backgroundColor: AppColors.bgCard,
@@ -126,12 +141,17 @@ class _AddDamagePhotosPageState extends ConsumerState<AddDamagePhotosPage> {
               child: ListView(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     margin: const EdgeInsets.only(bottom: 14),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(14),
-                      boxShadow: const [BoxShadow(color: Color(0x14000000), blurRadius: 6)],
+                      boxShadow: const [
+                        BoxShadow(color: Color(0x14000000), blurRadius: 6),
+                      ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,9 +159,21 @@ class _AddDamagePhotosPageState extends ConsumerState<AddDamagePhotosPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('$completedCount Of $totalCount Completed',
-                                style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-                            Text('$progress%', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                            Text(
+                              '$completedCount Of $totalCount Completed',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            Text(
+                              '$progress%',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -151,7 +183,9 @@ class _AddDamagePhotosPageState extends ConsumerState<AddDamagePhotosPage> {
                             value: progress / 100,
                             minHeight: 6,
                             backgroundColor: const Color(0xFFE2E8F0),
-                            valueColor: const AlwaysStoppedAnimation(AppColors.primary),
+                            valueColor: const AlwaysStoppedAnimation(
+                              AppColors.primary,
+                            ),
                           ),
                         ),
                       ],
@@ -162,9 +196,13 @@ class _AddDamagePhotosPageState extends ConsumerState<AddDamagePhotosPage> {
                       label: section.label,
                       guides: section.guides,
                       category: category,
-                      photos: _photosForPrefix(photos, section.prefix).map((e) => e.value).toList(),
+                      photos: _photosForPrefix(
+                        photos,
+                        section.prefix,
+                      ).map((e) => e.value).toList(),
                       selectedGuide: _selectedGuide[section.prefix] ?? 0,
-                      onSelectGuide: (i) => setState(() => _selectedGuide[section.prefix] = i),
+                      onSelectGuide: (i) =>
+                          setState(() => _selectedGuide[section.prefix] = i),
                       onCapture: () => _addPhoto(section.prefix),
                     ),
                   Container(
@@ -173,13 +211,21 @@ class _AddDamagePhotosPageState extends ConsumerState<AddDamagePhotosPage> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(14),
-                      boxShadow: const [BoxShadow(color: Color(0x14000000), blurRadius: 6)],
+                      boxShadow: const [
+                        BoxShadow(color: Color(0x14000000), blurRadius: 6),
+                      ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Additional Photos Of Damage',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                        const Text(
+                          'Additional Photos Of Damage',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                         const SizedBox(height: 10),
                         if (additionalPhotos.isNotEmpty)
                           Padding(
@@ -189,23 +235,34 @@ class _AddDamagePhotosPageState extends ConsumerState<AddDamagePhotosPage> {
                               runSpacing: 6,
                               children: [
                                 for (final entry in additionalPhotos)
-                                  _RemovableThumbnail(path: entry.value, onRemove: () => _removePhoto(entry.key)),
+                                  _RemovableThumbnail(
+                                    path: entry.value,
+                                    onRemove: () => _removePhoto(entry.key),
+                                  ),
                               ],
                             ),
                           ),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: () => _addAdditionalPhoto(additionalPhotos.length),
+                            onPressed: () =>
+                                _addAdditionalPhoto(additionalPhotos.length),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.btnPrimary,
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 13),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
                             child: Text(
-                              additionalPhotos.isNotEmpty ? '+ Add Another Photo' : 'Capture',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                              additionalPhotos.isNotEmpty
+                                  ? '+ Add Another Photo'
+                                  : 'Capture',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
                             ),
                           ),
                         ),
@@ -221,9 +278,17 @@ class _AddDamagePhotosPageState extends ConsumerState<AddDamagePhotosPage> {
                           backgroundColor: AppColors.statusCompleted,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 15),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                        child: const Text('Save & Submit', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        child: const Text(
+                          'Save & Submit',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
                     ),
                 ],
@@ -268,7 +333,14 @@ class _PhotoSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+            ),
+          ),
           const SizedBox(height: 8),
           // Reference shots for this side. These stay put no matter how many
           // photos are taken -- the captured ones stack up underneath.
@@ -285,10 +357,14 @@ class _PhotoSection extends StatelessWidget {
                           Container(
                             height: 54,
                             decoration: BoxDecoration(
-                              color: i == selectedGuide ? const Color(0xFFE0F2FE) : const Color(0xFFF1F5F9),
+                              color: i == selectedGuide
+                                  ? const Color(0xFFE0F2FE)
+                                  : const Color(0xFFF1F5F9),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: i == selectedGuide ? AppColors.primary : AppColors.borderInput,
+                                color: i == selectedGuide
+                                    ? AppColors.primary
+                                    : AppColors.borderInput,
                                 width: i == selectedGuide ? 2 : 1,
                               ),
                             ),
@@ -296,8 +372,10 @@ class _PhotoSection extends StatelessWidget {
                             child: Image.asset(
                               VehicleAssets.angleImage(category, angleId),
                               fit: BoxFit.contain,
-                              errorBuilder: (_, _, _) =>
-                                  const Icon(Icons.directions_car, color: AppColors.textSecondary),
+                              errorBuilder: (_, _, _) => const Icon(
+                                Icons.directions_car,
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 3),
@@ -308,8 +386,12 @@ class _PhotoSection extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 10,
-                              fontWeight: i == selectedGuide ? FontWeight.bold : FontWeight.normal,
-                              color: i == selectedGuide ? AppColors.primary : AppColors.textSecondary,
+                              fontWeight: i == selectedGuide
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: i == selectedGuide
+                                  ? AppColors.primary
+                                  : AppColors.textSecondary,
                             ),
                           ),
                         ],
@@ -332,7 +414,12 @@ class _PhotoSection extends StatelessWidget {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          child: Image.file(File(path), width: 72, height: 72, fit: BoxFit.cover),
+                          child: Image.file(
+                            File(path),
+                            width: 72,
+                            height: 72,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                         Positioned(
                           top: 4,
@@ -340,8 +427,15 @@ class _PhotoSection extends StatelessWidget {
                           child: Container(
                             width: 16,
                             height: 16,
-                            decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF22C55E)),
-                            child: const Icon(Icons.check, size: 9, color: Colors.white),
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Color(0xFF22C55E),
+                            ),
+                            child: const Icon(
+                              Icons.check,
+                              size: 9,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ],
@@ -357,11 +451,16 @@ class _PhotoSection extends StatelessWidget {
                 backgroundColor: AppColors.btnPrimary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 13),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               child: Text(
                 'Capture ${guides[selectedGuide.clamp(0, guides.length - 1)].$2}',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
               ),
             ),
           ),
@@ -383,7 +482,12 @@ class _RemovableThumbnail extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.file(File(path), width: 72, height: 72, fit: BoxFit.cover),
+          child: Image.file(
+            File(path),
+            width: 72,
+            height: 72,
+            fit: BoxFit.cover,
+          ),
         ),
         Positioned(
           top: 4,
@@ -393,7 +497,10 @@ class _RemovableThumbnail extends StatelessWidget {
             child: Container(
               width: 18,
               height: 18,
-              decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFEF4444)),
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0xFFEF4444),
+              ),
               child: const Icon(Icons.close, size: 9, color: Colors.white),
             ),
           ),

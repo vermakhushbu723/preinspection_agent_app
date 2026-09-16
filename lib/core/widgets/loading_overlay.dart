@@ -64,10 +64,7 @@ class _LoadingOverlayState extends State<LoadingOverlay> {
                       border: Border(
                         top: BorderSide(color: Colors.white, width: 4),
                         right: BorderSide(color: Colors.transparent, width: 4),
-                        bottom: BorderSide(
-                          color: Colors.transparent,
-                          width: 4,
-                        ),
+                        bottom: BorderSide(color: Colors.transparent, width: 4),
                         left: BorderSide(color: Colors.transparent, width: 4),
                       ),
                     ),

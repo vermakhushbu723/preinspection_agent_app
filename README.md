@@ -12,7 +12,7 @@ the web URLs so the two apps stay easy to compare.
 ```bash
 flutter pub get
 flutter run          # device / emulator (camera + location need a real device)
-flutter test         # 24 tests: routes, login/session, signature pad, doc-upload status, validators
+flutter test         # 44 tests: routes, login/session, market value, photo-guide layout, signature pad, doc upload
 flutter analyze
 ```
 
@@ -91,8 +91,13 @@ path to `AppRoutes`, and register it in `createAppRouter()`.
 - **Claim Start** — "Thank you for using risk inspection services"; checklist is
   previous policy copy, PUC, registration certificate, KYC.
 - **Owner & Vehicle Details** — extra *Survey type* radio (pre inspection /
-  Valuation), *Owner Serial Number* dropdown and *Present Market Value / IDV*
-  field; the action button reads **Next**.
+  Valuation) and *Owner Serial Number* dropdown; the action button reads
+  **Next**. The *Present Market Value / IDV* field appears only for a
+  **Valuation** survey. Make → model → variant are dependent dropdowns
+  (`data/vehicle_catalog.dart`), and the market value is filled in from the
+  selected variant's indicative ex-showroom price less age-based depreciation
+  (IRDAI slabs up to five years). The agent can overwrite it; replace the
+  catalogue with the insurer's rate master when available.
 - **Document Upload** — previous policy copy + PUC replace claim form, driving
   licence and repair estimate; all six documents are mandatory.
 - **Dashboard** — counters read Total Preinspection / Completed / Pending, and
@@ -118,13 +123,17 @@ copying it:
   strip along the bottom. Each of those cards pairs the guide shot with the
   agent's own capture. Every vehicle type gets a chassis-number card — the
   two-wheeler folder ships no plate artwork, so it borrows the car's.
-- **Add Others Photos** — the sample shot for each slot is small and shown at
-  full opacity, with the agent's own photo for that slot beside it; it used to
-  be a card-width image faded to 40%, which read as a broken photo.
+- **Add Others Photos** — each slot is split exactly in half: the sample
+  shot (full opacity) on the left and the agent's own photo or capture prompt
+  on the right, both in the same 4:3 frame.
 - **Camera capture** — the whole-car silhouette overlay (and the landscape
-  lock) applies only to the eight 360-degree angles. Close-ups — dashboard,
-  open hood, tyre numbers, under body, selfie — get a plain portrait
-  viewfinder.
+  lock) applies only to the eight 360-degree angles. Close-ups — odometer,
+  chassis plate, dashboard, open hood, tyre numbers, under body, selfie — get
+  a plain portrait viewfinder with the shutter at the bottom. The preview
+  fills the screen, opens without waiting for a GPS fix (location is fetched
+  alongside, with an 8 s limit and last-known fallback), pins its capture
+  orientation to the screen's, and releases/reopens the camera when the app
+  goes to the background.
 - **Signatures** — the pad claims the pointer outright, so a stroke is never
   swallowed by the surrounding scroll view, and Clear/Undo actually wipe the
   ink (see `test/core/signature_pad_test.dart`). The declaration screens are

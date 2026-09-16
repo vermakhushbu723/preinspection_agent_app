@@ -74,14 +74,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           : (captcha != _captchaText ? 'Captcha does not match' : null);
     });
 
-    if (_usernameError != null || _passwordError != null || _captchaError != null) {
+    if (_usernameError != null ||
+        _passwordError != null ||
+        _captchaError != null) {
       _refreshCaptcha();
       return;
     }
 
     // Remember who signed in -- the dashboard greets this id by name and
     // says whether it belongs to an agent or a surveyor.
-    ref.read(sessionProvider.notifier).signIn(userId: username, role: _activeTab);
+    ref
+        .read(sessionProvider.notifier)
+        .signIn(userId: username, role: _activeTab);
     context.go(AppRoutes.dashboard);
   }
 
@@ -106,7 +110,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     child: Column(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 16,
+                            horizontal: 20,
+                          ),
                           child: Column(
                             children: [
                               Row(
@@ -117,7 +124,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                       color: const Color(0xFFDB6F37),
                                       shadowColor: const Color(0x66E07B39),
                                       selected: _activeTab == UserRole.agent,
-                                      onTap: () => setState(() => _activeTab = UserRole.agent),
+                                      onTap: () => setState(
+                                        () => _activeTab = UserRole.agent,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 16),
@@ -127,7 +136,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                       color: const Color(0xFF4643F9),
                                       shadowColor: const Color(0x664F46E5),
                                       selected: _activeTab == UserRole.surveyor,
-                                      onTap: () => setState(() => _activeTab = UserRole.surveyor),
+                                      onTap: () => setState(
+                                        () => _activeTab = UserRole.surveyor,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -138,7 +149,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 hint: 'User Name',
                                 icon: Icons.person_outline,
                                 errorText: _usernameError,
-                                onChanged: (_) => setState(() => _usernameError = null),
+                                onChanged: (_) =>
+                                    setState(() => _usernameError = null),
                               ),
                               const SizedBox(height: 12),
                               _InputField(
@@ -146,13 +158,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 hint: 'Password',
                                 obscureText: !_showPassword,
                                 errorText: _passwordError,
-                                onChanged: (_) => setState(() => _passwordError = null),
+                                onChanged: (_) =>
+                                    setState(() => _passwordError = null),
                                 suffix: IconButton(
                                   icon: Icon(
-                                    _showPassword ? Icons.visibility : Icons.visibility_off,
+                                    _showPassword
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
                                     color: AppColors.textSecondary,
                                   ),
-                                  onPressed: () => setState(() => _showPassword = !_showPassword),
+                                  onPressed: () => setState(
+                                    () => _showPassword = !_showPassword,
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 16),
@@ -171,7 +188,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                     ),
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.refresh, color: AppColors.primary),
+                                    icon: const Icon(
+                                      Icons.refresh,
+                                      color: AppColors.primary,
+                                    ),
                                     onPressed: _refreshCaptcha,
                                   ),
                                 ],
@@ -181,10 +201,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 controller: _captchaController,
                                 hint: 'Enter Captcha',
                                 errorText: _captchaError,
-                                onChanged: (_) => setState(() => _captchaError = null),
+                                onChanged: (_) =>
+                                    setState(() => _captchaError = null),
                               ),
                               const SizedBox(height: 20),
-                              BottomButton(label: 'Login', onPressed: _handleLogin),
+                              BottomButton(
+                                label: 'Login',
+                                onPressed: _handleLogin,
+                              ),
                             ],
                           ),
                         ),
@@ -196,11 +220,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               Text.rich(
                                 TextSpan(
                                   text: 'Powered by ',
-                                  style: TextStyle(fontSize: 12, color: AppColors.textPrimary),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.textPrimary,
+                                  ),
                                   children: [
                                     TextSpan(
-                                      text: 'VROOMSYNC EXPERTISE PRIVATE LIMITED',
-                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                      text:
+                                          'VROOMSYNC EXPERTISE PRIVATE LIMITED',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -208,14 +238,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               SizedBox(height: 4),
                               Text(
                                 'All Rights Reserved 2025. CIN: U62099CT2025PTC017274',
-                                style: TextStyle(fontSize: 12, color: AppColors.textPrimary),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textPrimary,
+                                ),
                               ),
                               SizedBox(height: 4),
                               Text(
                                 "Insurance is subject matter of solicitation. Images used on the website "
                                 "and the mobile photographed, in them are for representative purpose only "
                                 "and are not indicative of anyone's thought.",
-                                style: TextStyle(fontSize: 12, color: AppColors.textPrimary),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textPrimary,
+                                ),
                               ),
                             ],
                           ),
@@ -260,7 +296,13 @@ class _TabButton extends StatelessWidget {
           color: color,
           borderRadius: BorderRadius.circular(7),
           boxShadow: selected
-              ? [BoxShadow(color: shadowColor, blurRadius: 14, offset: const Offset(0, 4))]
+              ? [
+                  BoxShadow(
+                    color: shadowColor,
+                    blurRadius: 14,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
               : null,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -269,7 +311,11 @@ class _TabButton extends StatelessWidget {
           child: Text(
             label,
             maxLines: 1,
-            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),
@@ -333,7 +379,10 @@ class _InputField extends StatelessWidget {
         if (errorText != null)
           Padding(
             padding: const EdgeInsets.only(top: 4, left: 4),
-            child: Text(errorText!, style: const TextStyle(color: AppColors.textRed, fontSize: 12)),
+            child: Text(
+              errorText!,
+              style: const TextStyle(color: AppColors.textRed, fontSize: 12),
+            ),
           ),
       ],
     );

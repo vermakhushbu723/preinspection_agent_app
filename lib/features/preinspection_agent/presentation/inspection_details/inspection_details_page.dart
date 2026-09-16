@@ -27,10 +27,30 @@ final _inspectionData = [
     InsurerBranding.current.name ?? '-',
     const Color(0xFF3B82F6),
   ),
-  const _InspectionRow(Icons.person, 'Insured Name', 'Rahul Sharma', Color(0xFF22C55E)),
-  const _InspectionRow(Icons.directions_car, 'Vehicle Number', 'MH 01 BS 1234', Color(0xFFEF4444)),
-  const _InspectionRow(Icons.assignment, 'PI Ref. Number', '1234567898765MAN', Color(0xFF7C3AED)),
-  const _InspectionRow(Icons.description, 'Policy Number', '1234 5678 9012', Color(0xFF16A34A)),
+  const _InspectionRow(
+    Icons.person,
+    'Insured Name',
+    'Rahul Sharma',
+    Color(0xFF22C55E),
+  ),
+  const _InspectionRow(
+    Icons.directions_car,
+    'Vehicle Number',
+    'MH 01 BS 1234',
+    Color(0xFFEF4444),
+  ),
+  const _InspectionRow(
+    Icons.assignment,
+    'PI Ref. Number',
+    '1234567898765MAN',
+    Color(0xFF7C3AED),
+  ),
+  const _InspectionRow(
+    Icons.description,
+    'Policy Number',
+    '1234 5678 9012',
+    Color(0xFF16A34A),
+  ),
 ];
 
 class _Instruction {
@@ -44,29 +64,39 @@ class _Instruction {
 
 const _instructions = [
   _Instruction(
-    Icons.screen_rotation, 'Enable Auto-Rotate',
+    Icons.screen_rotation,
+    'Enable Auto-Rotate',
     'Switch on auto-rotate and hold your phone horizontally to capture the full vehicle frame.',
-    Color(0xFF00E4DF), Color(0x4000E4DF),
+    Color(0xFF00E4DF),
+    Color(0x4000E4DF),
   ),
   _Instruction(
-    Icons.location_on, 'Turn On GPS Location',
+    Icons.location_on,
+    'Turn On GPS Location',
     'Ensure location services are enabled to verify inspection time and location.',
-    Color(0xFF7532FC), Color(0x407532FC),
+    Color(0xFF7532FC),
+    Color(0x407532FC),
   ),
   _Instruction(
-    Icons.camera_alt, 'Capture 360° Photos',
+    Icons.camera_alt,
+    'Capture 360° Photos',
     'Take clear photos of the front, rear, and both sides of the vehicle.',
-    Color(0xFF01A0FE), Color(0x4000A7F8),
+    Color(0xFF01A0FE),
+    Color(0x4000A7F8),
   ),
   _Instruction(
-    Icons.description_outlined, 'Ensure Document Clarity',
+    Icons.description_outlined,
+    'Ensure Document Clarity',
     'Place documents on a flat surface with good lighting. Avoid shadows and glare.',
-    Color(0xFFFF8427), Color(0x40FF8427),
+    Color(0xFFFF8427),
+    Color(0x40FF8427),
   ),
   _Instruction(
-    Icons.fact_check_outlined, 'Final Review Before Submission',
+    Icons.fact_check_outlined,
+    'Final Review Before Submission',
     'Double-check that all images are clear and the vehicle is fully visible.',
-    Color(0xFFFF1578), Color(0x40FF1578),
+    Color(0xFFFF1578),
+    Color(0x40FF1578),
   ),
 ];
 
@@ -85,9 +115,9 @@ class _InspectionDetailsPageState extends State<InspectionDetailsPage> {
   void _handleStartPhotos() => setState(() => _showLocation = true);
 
   void _handleLocationAllow() => setState(() {
-        _showLocation = false;
-        _showRotate = true;
-      });
+    _showLocation = false;
+    _showRotate = true;
+  });
 
   Future<void> _handleRotateAllow() async {
     setState(() => _showRotate = false);
@@ -117,7 +147,11 @@ class _InspectionDetailsPageState extends State<InspectionDetailsPage> {
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: AppColors.borderInput),
                         boxShadow: const [
-                          BoxShadow(color: Color(0x26000000), blurRadius: 6, offset: Offset(0, 1)),
+                          BoxShadow(
+                            color: Color(0x26000000),
+                            blurRadius: 6,
+                            offset: Offset(0, 1),
+                          ),
                         ],
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -128,7 +162,11 @@ class _InspectionDetailsPageState extends State<InspectionDetailsPage> {
                               padding: const EdgeInsets.symmetric(vertical: 6),
                               decoration: BoxDecoration(
                                 border: i < _inspectionData.length - 1
-                                    ? const Border(bottom: BorderSide(color: AppColors.borderInput))
+                                    ? const Border(
+                                        bottom: BorderSide(
+                                          color: AppColors.borderInput,
+                                        ),
+                                      )
                                     : null,
                               ),
                               child: Row(
@@ -138,24 +176,40 @@ class _InspectionDetailsPageState extends State<InspectionDetailsPage> {
                                     height: 32,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: _inspectionData[i].iconBg.withValues(alpha: 0.13),
-                                      border: Border.all(color: _inspectionData[i].iconBg, width: 1.5),
+                                      color: _inspectionData[i].iconBg
+                                          .withValues(alpha: 0.13),
+                                      border: Border.all(
+                                        color: _inspectionData[i].iconBg,
+                                        width: 1.5,
+                                      ),
                                     ),
-                                    child: Icon(_inspectionData[i].icon, size: 18, color: _inspectionData[i].iconBg),
+                                    child: Icon(
+                                      _inspectionData[i].icon,
+                                      size: 18,
+                                      color: _inspectionData[i].iconBg,
+                                    ),
                                   ),
                                   const SizedBox(width: 12),
                                   SizedBox(
                                     width: 128,
                                     child: Text(
                                       _inspectionData[i].label,
-                                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.textPrimary,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       _inspectionData[i].value,
-                                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColors.textPrimary,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -167,7 +221,11 @@ class _InspectionDetailsPageState extends State<InspectionDetailsPage> {
                     const SizedBox(height: 12),
                     const Text(
                       'Please read following important instructions before you start survey',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     for (final ins in _instructions)
@@ -182,7 +240,10 @@ class _InspectionDetailsPageState extends State<InspectionDetailsPage> {
                               decoration: BoxDecoration(
                                 color: ins.bg,
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: ins.color, width: 1.5),
+                                border: Border.all(
+                                  color: ins.color,
+                                  width: 1.5,
+                                ),
                               ),
                               child: Icon(ins.icon, size: 16, color: ins.color),
                             ),
@@ -191,9 +252,22 @@ class _InspectionDetailsPageState extends State<InspectionDetailsPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(ins.title, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: ins.color)),
+                                  Text(
+                                    ins.title,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: ins.color,
+                                    ),
+                                  ),
                                   const SizedBox(height: 2),
-                                  Text(ins.desc, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                  Text(
+                                    ins.desc,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -201,7 +275,10 @@ class _InspectionDetailsPageState extends State<InspectionDetailsPage> {
                         ),
                       ),
                     const SizedBox(height: 4),
-                    BottomButton(label: 'Start Taking Photos', onPressed: _handleStartPhotos),
+                    BottomButton(
+                      label: 'Start Taking Photos',
+                      onPressed: _handleStartPhotos,
+                    ),
                   ],
                 ),
               ),

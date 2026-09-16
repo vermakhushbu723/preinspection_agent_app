@@ -25,9 +25,9 @@ class MediaStorageService {
   /// [key] (e.g. the capture angle), returning the saved file's path.
   Future<String> savePhoto(String key, String sourcePath) async {
     final dir = await _sessionDir();
-    final ext = p.extension(sourcePath).isEmpty ? '.jpg' : p.extension(
-      sourcePath,
-    );
+    final ext = p.extension(sourcePath).isEmpty
+        ? '.jpg'
+        : p.extension(sourcePath);
     final dest = p.join(dir.path, '${_sanitize(key)}$ext');
     final saved = await File(sourcePath).copy(dest);
     return saved.path;
@@ -35,9 +35,9 @@ class MediaStorageService {
 
   Future<String> saveVideo(String key, String sourcePath) async {
     final dir = await _sessionDir();
-    final ext = p.extension(sourcePath).isEmpty ? '.mp4' : p.extension(
-      sourcePath,
-    );
+    final ext = p.extension(sourcePath).isEmpty
+        ? '.mp4'
+        : p.extension(sourcePath);
     final dest = p.join(dir.path, '${_sanitize(key)}$ext');
     final saved = await File(sourcePath).copy(dest);
     return saved.path;
@@ -59,5 +59,6 @@ class MediaStorageService {
     }
   }
 
-  String _sanitize(String key) => key.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
+  String _sanitize(String key) =>
+      key.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
 }

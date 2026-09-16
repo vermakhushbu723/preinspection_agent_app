@@ -30,9 +30,7 @@ class SecondaryButton extends StatelessWidget {
           foregroundColor: const Color(0xFF01A0FE),
           disabledForegroundColor: const Color(0xFF01A0FE),
           side: const BorderSide(color: Color(0xFF01A0FE), width: 2),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(7),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
         ),
         child: Text(
           label,

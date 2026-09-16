@@ -30,7 +30,9 @@ class _SubmittedPageState extends ConsumerState<SubmittedPage> {
   }
 
   Future<void> _resolve() async {
-    final already = await ref.read(claimFlowProvider.notifier).markSurveySubmitted();
+    final already = await ref
+        .read(claimFlowProvider.notifier)
+        .markSurveySubmitted();
     if (mounted) setState(() => _alreadySubmitted = already);
   }
 
@@ -49,7 +51,13 @@ class _SubmittedPageState extends ConsumerState<SubmittedPage> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
-            boxShadow: const [BoxShadow(color: Color(0x2E000000), blurRadius: 40, offset: Offset(0, 8))],
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x2E000000),
+                blurRadius: 40,
+                offset: Offset(0, 8),
+              ),
+            ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -60,21 +68,36 @@ class _SubmittedPageState extends ConsumerState<SubmittedPage> {
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: Color(0xFF22C55E),
-                  boxShadow: [BoxShadow(color: Color(0x5922C55E), blurRadius: 16, offset: Offset(0, 4))],
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0x5922C55E),
+                      blurRadius: 16,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: const Icon(Icons.check, color: Colors.white, size: 32),
               ),
               const SizedBox(height: 20),
               const Text(
                 'SUBMITTED',
-                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 26, color: AppColors.textPrimary, letterSpacing: 1),
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 26,
+                  color: AppColors.textPrimary,
+                  letterSpacing: 1,
+                ),
               ),
               if (already == true) ...[
                 const SizedBox(height: 16),
                 const Text(
                   'This survey Already has\nDo you want to submit\nduring repair & reinspection\nPhotos & Repair bills',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 15, color: AppColors.textPrimary, height: 1.7),
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: AppColors.textPrimary,
+                    height: 1.7,
+                  ),
                 ),
                 const SizedBox(height: 28),
                 SizedBox(
@@ -85,9 +108,18 @@ class _SubmittedPageState extends ConsumerState<SubmittedPage> {
                       backgroundColor: AppColors.btnPrimary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 15),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                    child: const Text('Continue', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.3)),
+                    child: const Text(
+                      'Continue',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
                   ),
                 ),
               ],

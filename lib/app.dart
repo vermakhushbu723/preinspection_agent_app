@@ -31,7 +31,9 @@ class PreinspectionAgentApp extends StatelessWidget {
                 : AppColors.textPrimary,
           ),
           dayBackgroundColor: WidgetStateProperty.resolveWith(
-            (states) => states.contains(WidgetState.selected) ? AppColors.primary : null,
+            (states) => states.contains(WidgetState.selected)
+                ? AppColors.primary
+                : null,
           ),
           todayForegroundColor: WidgetStateProperty.resolveWith(
             (states) => states.contains(WidgetState.selected)
@@ -39,7 +41,9 @@ class PreinspectionAgentApp extends StatelessWidget {
                 : AppColors.primary,
           ),
           todayBackgroundColor: WidgetStateProperty.resolveWith(
-            (states) => states.contains(WidgetState.selected) ? AppColors.primary : null,
+            (states) => states.contains(WidgetState.selected)
+                ? AppColors.primary
+                : null,
           ),
           todayBorder: const BorderSide(color: AppColors.primary),
           yearForegroundColor: WidgetStateProperty.resolveWith(
@@ -48,10 +52,16 @@ class PreinspectionAgentApp extends StatelessWidget {
                 : AppColors.textPrimary,
           ),
           yearBackgroundColor: WidgetStateProperty.resolveWith(
-            (states) => states.contains(WidgetState.selected) ? AppColors.primary : null,
+            (states) => states.contains(WidgetState.selected)
+                ? AppColors.primary
+                : null,
           ),
-          confirmButtonStyle: TextButton.styleFrom(foregroundColor: AppColors.primary),
-          cancelButtonStyle: TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
+          confirmButtonStyle: TextButton.styleFrom(
+            foregroundColor: AppColors.primary,
+          ),
+          cancelButtonStyle: TextButton.styleFrom(
+            foregroundColor: AppColors.textSecondary,
+          ),
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(AppRadius.lg)),
           ),

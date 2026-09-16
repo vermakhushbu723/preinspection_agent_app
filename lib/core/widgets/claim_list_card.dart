@@ -38,7 +38,11 @@ class ClaimListCard extends StatelessWidget {
     final rows = <(IconData, String, String)>[
       (Icons.business_outlined, 'Insurer Name', insurerName),
       (Icons.assignment_outlined, 'PI Ref. Number', claimNumber),
-      (Icons.directions_car_outlined, 'Registration Number', registrationNumber),
+      (
+        Icons.directions_car_outlined,
+        'Registration Number',
+        registrationNumber,
+      ),
       (Icons.person_outline, 'Owner Name', insuredName),
     ];
 
@@ -77,7 +81,14 @@ class ClaimListCard extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 4),
               child: Row(
                 children: [
-                  SizedBox(width: 20, child: Icon(row.$1, size: 16, color: AppColors.textSecondary)),
+                  SizedBox(
+                    width: 20,
+                    child: Icon(
+                      row.$1,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                   const SizedBox(width: 4),
                   SizedBox(
                     width: 128,

@@ -9,28 +9,28 @@ import 'package:preinspection_agent_app/core/widgets/signature_pad.dart';
 /// tests pump it inside a ListView on purpose: a vertical stroke used to be
 /// claimed by the scroll view, which is what made signing look broken.
 Widget _wrap(Widget pad) => MaterialApp(
-      home: Scaffold(
-        body: ListView(
-          children: [
-            const SizedBox(height: 400),
-            pad,
-            const SizedBox(height: 800),
-          ],
-        ),
-      ),
-    );
+  home: Scaffold(
+    body: ListView(
+      children: [const SizedBox(height: 400), pad, const SizedBox(height: 800)],
+    ),
+  ),
+);
 
 void main() {
-  testWidgets('a stroke drawn inside a scroll view reaches the pad', (tester) async {
+  testWidgets('a stroke drawn inside a scroll view reaches the pad', (
+    tester,
+  ) async {
     Uint8List? emitted;
     final controller = SignaturePadController();
 
-    await tester.pumpWidget(_wrap(
-      SignaturePad(
-        controller: controller,
-        onChanged: (bytes) => emitted = bytes,
+    await tester.pumpWidget(
+      _wrap(
+        SignaturePad(
+          controller: controller,
+          onChanged: (bytes) => emitted = bytes,
+        ),
       ),
-    ));
+    );
 
     final pad = find.byType(SignaturePad);
     final centre = tester.getCenter(pad);
@@ -54,11 +54,10 @@ void main() {
     expect(emitted, isNotNull, reason: 'the stroke should have been reported');
   });
 
-  testWidgets('the list still scrolls when the drag starts outside the pad',
-      (tester) async {
-    await tester.pumpWidget(_wrap(
-      SignaturePad(onChanged: (_) {}),
-    ));
+  testWidgets('the list still scrolls when the drag starts outside the pad', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_wrap(SignaturePad(onChanged: (_) {})));
 
     final before = tester.getTopLeft(find.byType(SignaturePad)).dy;
     await tester.drag(find.byType(ListView), const Offset(0, -120));
@@ -67,16 +66,20 @@ void main() {
     expect(tester.getTopLeft(find.byType(SignaturePad)).dy, lessThan(before));
   });
 
-  testWidgets('controller.clear wipes the ink and reports null', (tester) async {
+  testWidgets('controller.clear wipes the ink and reports null', (
+    tester,
+  ) async {
     Uint8List? emitted;
     final controller = SignaturePadController();
 
-    await tester.pumpWidget(_wrap(
-      SignaturePad(
-        controller: controller,
-        onChanged: (bytes) => emitted = bytes,
+    await tester.pumpWidget(
+      _wrap(
+        SignaturePad(
+          controller: controller,
+          onChanged: (bytes) => emitted = bytes,
+        ),
       ),
-    ));
+    );
 
     final centre = tester.getCenter(find.byType(SignaturePad));
     final gesture = await tester.startGesture(centre);
@@ -98,9 +101,11 @@ void main() {
   testWidgets('a disabled pad ignores strokes', (tester) async {
     Uint8List? emitted;
 
-    await tester.pumpWidget(_wrap(
-      SignaturePad(enabled: false, onChanged: (bytes) => emitted = bytes),
-    ));
+    await tester.pumpWidget(
+      _wrap(
+        SignaturePad(enabled: false, onChanged: (bytes) => emitted = bytes),
+      ),
+    );
 
     final centre = tester.getCenter(find.byType(SignaturePad));
     final gesture = await tester.startGesture(centre);

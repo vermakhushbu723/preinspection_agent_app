@@ -16,34 +16,39 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  test('setOwnerVehicleDetails updates state and derives vehicle category', () async {
-    final container = ProviderContainer();
-    addTearDown(container.dispose);
+  test(
+    'setOwnerVehicleDetails updates state and derives vehicle category',
+    () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
 
-    const details = OwnerVehicleDetails(
-      surveyType: 'pre inspection',
-      ownerName: 'Rahul Sharma',
-      mobile: '9876543210',
-      email: 'rahul@example.com',
-      odometer: '12000',
-      registrationNumber: 'OD02AB1234',
-      state: 'Odisha',
-      registrationDate: '01-01-2026',
-      product: 'Two Wheeler',
-      make: 'Honda',
-      model: 'Activa',
-      variant: 'Base',
-      manufacturingYear: '01-2024',
-      ownerSerialNumber: '2',
-      idv: '450000',
-    );
+      const details = OwnerVehicleDetails(
+        surveyType: 'pre inspection',
+        ownerName: 'Rahul Sharma',
+        mobile: '9876543210',
+        email: 'rahul@example.com',
+        odometer: '12000',
+        registrationNumber: 'OD02AB1234',
+        state: 'Odisha',
+        registrationDate: '01-01-2026',
+        product: 'Two Wheeler',
+        make: 'Honda',
+        model: 'Activa',
+        variant: 'Base',
+        manufacturingYear: '01-2024',
+        ownerSerialNumber: '2',
+        idv: '450000',
+      );
 
-    container.read(claimFlowProvider.notifier).setOwnerVehicleDetails(details);
+      container
+          .read(claimFlowProvider.notifier)
+          .setOwnerVehicleDetails(details);
 
-    final state = container.read(claimFlowProvider);
-    expect(state.ownerVehicleDetails.ownerName, 'Rahul Sharma');
-    expect(state.ownerVehicleDetails.vehicleCategory, VehicleCategory.bike);
-  });
+      final state = container.read(claimFlowProvider);
+      expect(state.ownerVehicleDetails.ownerName, 'Rahul Sharma');
+      expect(state.ownerVehicleDetails.vehicleCategory, VehicleCategory.bike);
+    },
+  );
 
   test('photo add/remove updates the photo manifest', () {
     final container = ProviderContainer();
@@ -51,10 +56,16 @@ void main() {
 
     final notifier = container.read(claimFlowProvider.notifier);
     notifier.setPhoto('front-side', '/tmp/front.jpg');
-    expect(container.read(claimFlowProvider).photos['front-side'], '/tmp/front.jpg');
+    expect(
+      container.read(claimFlowProvider).photos['front-side'],
+      '/tmp/front.jpg',
+    );
 
     notifier.removePhoto('front-side');
-    expect(container.read(claimFlowProvider).photos.containsKey('front-side'), isFalse);
+    expect(
+      container.read(claimFlowProvider).photos.containsKey('front-side'),
+      isFalse,
+    );
   });
 
   test('signatures must both be present before submit is allowed', () {
@@ -75,8 +86,13 @@ void main() {
     final container = ProviderContainer();
     addTearDown(container.dispose);
 
-    await container.read(claimFlowProvider.notifier).setWorkflowOption(WorkflowOption.group2);
-    expect(container.read(claimFlowProvider).workflowOption, WorkflowOption.group2);
+    await container
+        .read(claimFlowProvider.notifier)
+        .setWorkflowOption(WorkflowOption.group2);
+    expect(
+      container.read(claimFlowProvider).workflowOption,
+      WorkflowOption.group2,
+    );
   });
 
   test('resetSession clears back to a fresh state', () async {

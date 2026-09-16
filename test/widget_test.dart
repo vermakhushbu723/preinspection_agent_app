@@ -5,8 +5,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:preinspection_agent_app/app.dart';
 
 void main() {
-  testWidgets('App boots to the PreinspectionAgent login screen', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: PreinspectionAgentApp()));
+  testWidgets('App boots to the PreinspectionAgent login screen', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const ProviderScope(child: PreinspectionAgentApp()),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Login'), findsOneWidget);
@@ -16,12 +20,16 @@ void main() {
     expect(find.text('Surveyor'), findsOneWidget);
   });
 
-  testWidgets('the dashboard greets the signed-in id and its role', (tester) async {
+  testWidgets('the dashboard greets the signed-in id and its role', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(const ProviderScope(child: PreinspectionAgentApp()));
+    await tester.pumpWidget(
+      const ProviderScope(child: PreinspectionAgentApp()),
+    );
     await tester.pumpAndSettle();
 
     // Sign in as a surveyor: pick the tab, then fill the form.
@@ -38,8 +46,12 @@ void main() {
     final captcha = tester
         .widgetList<Text>(find.byType(Text))
         .map((t) => t.data)
-        .firstWhere((d) =>
-            d != null && !labels.contains(d) && RegExp(r'^[A-Za-z0-9]{5}$').hasMatch(d))!;
+        .firstWhere(
+          (d) =>
+              d != null &&
+              !labels.contains(d) &&
+              RegExp(r'^[A-Za-z0-9]{5}$').hasMatch(d),
+        )!;
     await tester.enterText(fields.at(2), captcha);
 
     await tester.tap(find.text('Login'));
@@ -49,9 +61,15 @@ void main() {
     expect(find.text('Total Preinspection'), findsOneWidget);
     // ...greeted by the id that was typed in (the greeting is a Text.rich, so
     // the finder has to look inside the span) and the role its tab selected.
-    expect(find.textContaining('SURV-4821', findRichText: true), findsOneWidget);
+    expect(
+      find.textContaining('SURV-4821', findRichText: true),
+      findsOneWidget,
+    );
     expect(find.text('Pre-Inspection Surveyor'), findsOneWidget);
     // The hardcoded workshop name is gone.
-    expect(find.textContaining('XYZ Automobiles', findRichText: true), findsNothing);
+    expect(
+      find.textContaining('XYZ Automobiles', findRichText: true),
+      findsNothing,
+    );
   });
 }

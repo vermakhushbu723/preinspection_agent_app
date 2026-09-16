@@ -35,6 +35,7 @@ class DocumentPickerModal extends StatefulWidget {
   final String docName;
   final DocPickerMode mode;
   final ImageSource source;
+
   /// Called once, on Save, with every staged side (`{'Front Side': path}`).
   final void Function(Map<String, String> sides)? onSaveSides;
   final void Function(String name, List<String> paths)? onSaveMulti;
@@ -74,7 +75,8 @@ class _DocumentPickerModalState extends State<DocumentPickerModal> {
   final Map<String, String> _sideImages = {};
 
   bool get _isMulti =>
-      widget.mode == DocPickerMode.multiple || widget.mode == DocPickerMode.other;
+      widget.mode == DocPickerMode.multiple ||
+      widget.mode == DocPickerMode.other;
   bool get _isOther => widget.mode == DocPickerMode.other;
   bool get _isSingle => widget.mode == DocPickerMode.single;
 
@@ -91,7 +93,10 @@ class _DocumentPickerModalState extends State<DocumentPickerModal> {
   }
 
   Future<void> _pickForSide(String side) async {
-    final file = await _picker.pickImage(source: widget.source, imageQuality: 85);
+    final file = await _picker.pickImage(
+      source: widget.source,
+      imageQuality: 85,
+    );
     if (file == null) return;
     // Staged only -- committed by _saveSides() so the user can retake a side
     // before it counts against the document.
@@ -107,7 +112,10 @@ class _DocumentPickerModalState extends State<DocumentPickerModal> {
   }
 
   Future<void> _addMultiImage() async {
-    final file = await _picker.pickImage(source: widget.source, imageQuality: 85);
+    final file = await _picker.pickImage(
+      source: widget.source,
+      imageQuality: 85,
+    );
     if (file == null) return;
     setState(() => _multiImages.add(file.path));
   }
@@ -117,7 +125,8 @@ class _DocumentPickerModalState extends State<DocumentPickerModal> {
   }
 
   bool get _canSaveMulti =>
-      _multiImages.isNotEmpty && (!_isOther || _nameController.text.trim().isNotEmpty);
+      _multiImages.isNotEmpty &&
+      (!_isOther || _nameController.text.trim().isNotEmpty);
 
   void _saveMulti() {
     if (!_canSaveMulti) return;
@@ -158,7 +167,10 @@ class _DocumentPickerModalState extends State<DocumentPickerModal> {
                     )
                   : Text(
                       widget.docName,
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
                     ),
             ),
             IconButton(
@@ -177,7 +189,12 @@ class _DocumentPickerModalState extends State<DocumentPickerModal> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(6),
-                    child: Image.file(File(_multiImages[i]), width: 72, height: 72, fit: BoxFit.cover),
+                    child: Image.file(
+                      File(_multiImages[i]),
+                      width: 72,
+                      height: 72,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                   Positioned(
                     top: 2,
@@ -207,7 +224,14 @@ class _DocumentPickerModalState extends State<DocumentPickerModal> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.add, color: AppColors.primary, size: 18),
-                    Text('Add', style: TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.w600)),
+                    Text(
+                      'Add',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -233,7 +257,9 @@ class _DocumentPickerModalState extends State<DocumentPickerModal> {
               disabledBackgroundColor: const Color(0xFF9CA3AF),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: Text(
               'Save${_multiImages.isNotEmpty ? ' (${_multiImages.length})' : ''}',
@@ -255,7 +281,10 @@ class _DocumentPickerModalState extends State<DocumentPickerModal> {
             Expanded(
               child: Text(
                 widget.docName,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
               ),
             ),
             IconButton(
@@ -277,12 +306,18 @@ class _DocumentPickerModalState extends State<DocumentPickerModal> {
                       width: 80,
                       height: 80,
                       decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.borderInput, width: 2),
+                        border: Border.all(
+                          color: AppColors.borderInput,
+                          width: 2,
+                        ),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       clipBehavior: Clip.antiAlias,
                       child: _sideImages[side] != null
-                          ? Image.file(File(_sideImages[side]!), fit: BoxFit.cover)
+                          ? Image.file(
+                              File(_sideImages[side]!),
+                              fit: BoxFit.cover,
+                            )
                           : Icon(
                               widget.source == ImageSource.gallery
                                   ? Icons.photo_library_outlined
@@ -297,7 +332,12 @@ class _DocumentPickerModalState extends State<DocumentPickerModal> {
                 ),
               ),
               if (sides.length > 1 && side == sides.first)
-                Container(width: 1, height: 100, color: AppColors.borderLight, margin: const EdgeInsets.symmetric(horizontal: 20)),
+                Container(
+                  width: 1,
+                  height: 100,
+                  color: AppColors.borderLight,
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                ),
             ],
           ],
         ),
@@ -319,7 +359,9 @@ class _DocumentPickerModalState extends State<DocumentPickerModal> {
               disabledBackgroundColor: const Color(0xFF9CA3AF),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: Text(
               'Save${_canSaveSides ? ' (${_sideImages.length})' : ''}',

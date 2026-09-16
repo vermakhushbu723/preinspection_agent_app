@@ -7,7 +7,10 @@ import '../theme/app_colors.dart';
 /// lock orientation directly via `AppOrientation` and only need this as a
 /// short-lived fallback.
 class RotateDevicePrompt extends StatelessWidget {
-  const RotateDevicePrompt({super.key, this.message = 'Please rotate your device to landscape'});
+  const RotateDevicePrompt({
+    super.key,
+    this.message = 'Please rotate your device to landscape',
+  });
 
   final String message;
 
@@ -26,7 +29,11 @@ class RotateDevicePrompt extends StatelessWidget {
             child: Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

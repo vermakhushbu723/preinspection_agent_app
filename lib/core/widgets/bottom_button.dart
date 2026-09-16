@@ -24,14 +24,12 @@ class BottomButton extends StatelessWidget {
         onPressed: isDisabled ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.btnPrimary,
-          disabledBackgroundColor: const Color(0xFF93C5FD).withValues(
-            alpha: 0.7,
-          ),
+          disabledBackgroundColor: const Color(
+            0xFF93C5FD,
+          ).withValues(alpha: 0.7),
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
           elevation: 0,
         ),
         child: Text(

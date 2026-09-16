@@ -110,54 +110,70 @@ class _LocationModalState extends State<LocationModal> {
                     ? const Color(0x26EF4444)
                     : const Color(0x40FF9609),
                 border: Border.all(
-                  color: isError ? AppColors.statusPending : const Color(0xFFFF9609),
+                  color: isError
+                      ? AppColors.statusPending
+                      : const Color(0xFFFF9609),
                 ),
               ),
               child: Icon(
                 Icons.location_on,
                 size: 42,
-                color: isError ? AppColors.statusPending : const Color(0xFFFF9609),
+                color: isError
+                    ? AppColors.statusPending
+                    : const Color(0xFFFF9609),
               ),
             ),
             Text(
               isOff
                   ? 'Turn On Location First'
                   : isDenied
-                      ? 'Permission Required'
-                      : 'Checking Location',
+                  ? 'Permission Required'
+                  : 'Checking Location',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
-                color: isError ? AppColors.statusPending : AppColors.locationAccent,
+                color: isError
+                    ? AppColors.statusPending
+                    : AppColors.locationAccent,
               ),
             ),
             const SizedBox(height: 12),
             Text(
-              isChecking ? 'Please wait while we check your location…' : _errorMsg,
+              isChecking
+                  ? 'Please wait while we check your location…'
+                  : _errorMsg,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, color: AppColors.textPrimary, height: 1.4),
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textPrimary,
+                height: 1.4,
+              ),
             ),
             if (isOff) ...[
               const SizedBox(height: 12),
               const Align(
                 alignment: Alignment.centerLeft,
-                child: _BulletList(items: [
-                  'Open your phone Settings.',
-                  'Turn ON Location / GPS.',
-                  'Come back and tap "I\'ve Turned It On".',
-                ]),
+                child: _BulletList(
+                  items: [
+                    'Open your phone Settings.',
+                    'Turn ON Location / GPS.',
+                    'Come back and tap "I\'ve Turned It On".',
+                  ],
+                ),
               ),
             ],
             if (isDenied) ...[
               const SizedBox(height: 12),
               const Align(
                 alignment: Alignment.centerLeft,
-                child: _BulletList(items: [
-                  "Open this app's permissions in your device settings.",
-                  'Allow Location access for this app.',
-                  'Tap "Try Again" below.',
-                ]),
+                child: _BulletList(
+                  items: [
+                    "Open this app's permissions in your device settings.",
+                    'Allow Location access for this app.',
+                    'Tap "Try Again" below.',
+                  ],
+                ),
               ),
             ],
             if (!isError && !isChecking)
@@ -166,7 +182,10 @@ class _LocationModalState extends State<LocationModal> {
                 child: Text(
                   'Location is mandatory to verify inspection time and place.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
             const SizedBox(height: 16),
@@ -197,7 +216,10 @@ class _BulletList extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 2),
             child: Text(
               '•  $item',
-              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
       ],

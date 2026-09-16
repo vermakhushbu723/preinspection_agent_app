@@ -17,10 +17,22 @@ class _DocumentItem {
 // ClaimStartPage.jsx): previous policy copy, PUC, RC and KYC — no claim
 // form / repair estimate, which belong to the claim flow.
 const _documents = [
-  _DocumentItem(Icons.description_outlined, 'Previous policy copy', Color(0xFF7C3AED)),
+  _DocumentItem(
+    Icons.description_outlined,
+    'Previous policy copy',
+    Color(0xFF7C3AED),
+  ),
   _DocumentItem(Icons.badge_outlined, 'PUC', Color(0xFFEF4444)),
-  _DocumentItem(Icons.directions_car_outlined, 'Registration Certificate', Color(0xFF16A34A)),
-  _DocumentItem(Icons.perm_identity, 'KYC ( Aadhar & PAN Card )', Color(0xFF0EA5E9)),
+  _DocumentItem(
+    Icons.directions_car_outlined,
+    'Registration Certificate',
+    Color(0xFF16A34A),
+  ),
+  _DocumentItem(
+    Icons.perm_identity,
+    'KYC ( Aadhar & PAN Card )',
+    Color(0xFF0EA5E9),
+  ),
 ];
 
 const _tollFreeNumber = '+91 1234567890';
@@ -73,7 +85,10 @@ class ClaimStartPage extends StatelessWidget {
                     'Before you click the "Start" button, please keep following documents '
                     'handy; as essential to proceed further in survey',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -118,12 +133,19 @@ class ClaimStartPage extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.phone_outlined, color: AppColors.iconPhone, size: 20),
+                      const Icon(
+                        Icons.phone_outlined,
+                        color: AppColors.iconPhone,
+                        size: 20,
+                      ),
                       const SizedBox(width: 10),
                       const Expanded(
                         child: Text(
                           'If You Need Any Help Please Contact Our Toll Free Number',
-                          style: TextStyle(fontSize: 12, color: AppColors.textPrimary),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),

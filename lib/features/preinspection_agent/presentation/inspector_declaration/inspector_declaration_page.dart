@@ -20,10 +20,12 @@ class InspectorDeclarationPage extends ConsumerStatefulWidget {
   const InspectorDeclarationPage({super.key});
 
   @override
-  ConsumerState<InspectorDeclarationPage> createState() => _InspectorDeclarationPageState();
+  ConsumerState<InspectorDeclarationPage> createState() =>
+      _InspectorDeclarationPageState();
 }
 
-class _InspectorDeclarationPageState extends ConsumerState<InspectorDeclarationPage> {
+class _InspectorDeclarationPageState
+    extends ConsumerState<InspectorDeclarationPage> {
   bool _agreed = false;
 
   void _continue() {
@@ -47,12 +49,21 @@ class _InspectorDeclarationPageState extends ConsumerState<InspectorDeclarationP
               const Text(
                 'INSPECTOR DECLARATION',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF111827), letterSpacing: 1.1),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF111827),
+                  letterSpacing: 1.1,
+                ),
               ),
               const SizedBox(height: 32),
               const Text(
                 _declarationText,
-                style: TextStyle(fontSize: 15, height: 1.8, color: Color(0xFF1F2937)),
+                style: TextStyle(
+                  fontSize: 15,
+                  height: 1.8,
+                  color: Color(0xFF1F2937),
+                ),
               ),
               GestureDetector(
                 onTap: () => setState(() => _agreed = !_agreed),
@@ -60,9 +71,18 @@ class _InspectorDeclarationPageState extends ConsumerState<InspectorDeclarationP
                   padding: const EdgeInsets.only(top: 32),
                   child: Row(
                     children: [
-                      Checkbox(value: _agreed, onChanged: (v) => setState(() => _agreed = v ?? false)),
+                      Checkbox(
+                        value: _agreed,
+                        onChanged: (v) => setState(() => _agreed = v ?? false),
+                      ),
                       const SizedBox(width: 2),
-                      const Text('I Agree', style: TextStyle(fontSize: 14, color: Color(0xFF374151))),
+                      const Text(
+                        'I Agree',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF374151),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -76,9 +96,14 @@ class _InspectorDeclarationPageState extends ConsumerState<InspectorDeclarationP
                     disabledBackgroundColor: const Color(0xFF93C5FD),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                  child: const Text('Continue', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Continue',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ],

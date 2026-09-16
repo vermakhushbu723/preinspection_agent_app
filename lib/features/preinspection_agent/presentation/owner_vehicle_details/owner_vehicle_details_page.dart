@@ -11,39 +11,68 @@ import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_header.dart';
 import '../../../../core/widgets/bottom_button.dart';
 import '../../../../core/widgets/page_title_bar.dart';
+import '../../data/vehicle_catalog.dart';
 import '../../domain/models/owner_vehicle_details.dart';
 import '../../state/claim_flow_provider.dart';
 
 const _indianStates = [
-  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
-  'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
-  'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
-  'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
-  'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
-  'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
-  'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
-  'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
+  'Andhra Pradesh',
+  'Arunachal Pradesh',
+  'Assam',
+  'Bihar',
+  'Chhattisgarh',
+  'Goa',
+  'Gujarat',
+  'Haryana',
+  'Himachal Pradesh',
+  'Jharkhand',
+  'Karnataka',
+  'Kerala',
+  'Madhya Pradesh',
+  'Maharashtra',
+  'Manipur',
+  'Meghalaya',
+  'Mizoram',
+  'Nagaland',
+  'Odisha',
+  'Punjab',
+  'Rajasthan',
+  'Sikkim',
+  'Tamil Nadu',
+  'Telangana',
+  'Tripura',
+  'Uttar Pradesh',
+  'Uttarakhand',
+  'West Bengal',
+  'Andaman and Nicobar Islands',
+  'Chandigarh',
+  'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi',
+  'Jammu and Kashmir',
+  'Ladakh',
+  'Lakshadweep',
+  'Puducherry',
 ];
 
 const _products = ['Private Car', 'Two Wheeler', 'Commercial Vehicle', 'Taxi'];
-const _makes = [
-  'Mahindra', 'Maruti Suzuki', 'Hyundai', 'Tata', 'Honda', 'Toyota', 'Ford',
-  'Kia', 'Volkswagen', 'Skoda', 'Renault', 'Nissan', 'MG', 'Jeep',
-];
-const _models = ['Scorpio-N', 'XUV 700', 'Thar', 'Bolero', 'XUV 300'];
-const _variants = ['Z2', 'Z4', 'Z6', 'Z8', 'Z8L'];
 const _ownerSerialNumbers = ['1', '2', '3', '4', '5'];
-const _surveyTypes = ['pre inspection', 'Valuation'];
+const _preInspection = 'pre inspection';
+const _valuation = 'Valuation';
+const _surveyTypes = [_preInspection, _valuation];
+
+final _rupees = NumberFormat.decimalPattern('en_IN');
 
 /// Port of `OwnerVehicleDetailsPage.jsx`.
 class OwnerVehicleDetailsPage extends ConsumerStatefulWidget {
   const OwnerVehicleDetailsPage({super.key});
 
   @override
-  ConsumerState<OwnerVehicleDetailsPage> createState() => _OwnerVehicleDetailsPageState();
+  ConsumerState<OwnerVehicleDetailsPage> createState() =>
+      _OwnerVehicleDetailsPageState();
 }
 
-class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPage> {
+class _OwnerVehicleDetailsPageState
+    extends ConsumerState<OwnerVehicleDetailsPage> {
   final _ownerNameController = TextEditingController();
   final _mobileController = TextEditingController();
   final _emailController = TextEditingController();
@@ -62,6 +91,28 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
   DateTime? _manufacturingYear;
 
   final Map<String, String?> _errors = {};
+
+  /// Only a valuation survey asks for the vehicle's present market value.
+  bool get _isValuation => _surveyType == _valuation;
+
+  /// The suggested value for the current selection, if it can be worked out.
+  MarketValueEstimate? get _estimate => estimateMarketValue(
+    product: _product,
+    make: _make,
+    model: _model,
+    variant: _variant,
+    manufactured: _manufacturingYear,
+  );
+
+  /// Re-fills the market value from the current selection. Called whenever a
+  /// field the estimate depends on changes, so the figure always matches what
+  /// is selected; the agent can still type over it afterwards.
+  void _refreshMarketValue() {
+    if (!_isValuation) return;
+    final estimate = _estimate;
+    _idvController.text = estimate == null ? '' : '${estimate.value}';
+    if (estimate != null) _errors['idv'] = null;
+  }
 
   @override
   void dispose() {
@@ -101,26 +152,48 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
       setState(() {
         _manufacturingYear = picked;
         _errors['manufacturingYear'] = null;
+        _refreshMarketValue();
       });
     }
   }
 
   bool _validate() {
     final errors = <String, String?>{
-      'ownerName': _ownerNameController.text.trim().isEmpty ? 'Owner name is required' : null,
-      'mobile': !RegExp(r'^\d{10}$').hasMatch(_mobileController.text.trim()) ? 'Enter a valid 10-digit mobile' : null,
-      'email': !RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(_emailController.text.trim()) ? 'Enter a valid email' : null,
-      'odometer': _odometerController.text.trim().isEmpty ? 'Odometer reading is required' : null,
-      'registrationNumber': _regNoController.text.trim().isEmpty ? 'Registration number is required' : null,
+      'ownerName': _ownerNameController.text.trim().isEmpty
+          ? 'Owner name is required'
+          : null,
+      'mobile': !RegExp(r'^\d{10}$').hasMatch(_mobileController.text.trim())
+          ? 'Enter a valid 10-digit mobile'
+          : null,
+      'email':
+          !RegExp(
+            r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
+          ).hasMatch(_emailController.text.trim())
+          ? 'Enter a valid email'
+          : null,
+      'odometer': _odometerController.text.trim().isEmpty
+          ? 'Odometer reading is required'
+          : null,
+      'registrationNumber': _regNoController.text.trim().isEmpty
+          ? 'Registration number is required'
+          : null,
       'state': _state == null ? 'Select a state' : null,
-      'registrationDate': _registrationDate == null ? 'Select registration date' : null,
+      'registrationDate': _registrationDate == null
+          ? 'Select registration date'
+          : null,
       'product': _product == null ? 'Select a product' : null,
       'make': _make == null ? 'Select a make' : null,
       'model': _model == null ? 'Select a model' : null,
       'variant': _variant == null ? 'Select a variant' : null,
-      'manufacturingYear': _manufacturingYear == null ? 'Select manufacturing year' : null,
-      'ownerSerialNumber': _ownerSerialNumber == null ? 'Select owner serial number' : null,
-      'idv': _idvController.text.trim().isEmpty ? 'Present market value is required' : null,
+      'manufacturingYear': _manufacturingYear == null
+          ? 'Select manufacturing year'
+          : null,
+      'ownerSerialNumber': _ownerSerialNumber == null
+          ? 'Select owner serial number'
+          : null,
+      'idv': _isValuation && _idvController.text.trim().isEmpty
+          ? 'Present market value is required'
+          : null,
     }..removeWhere((key, value) => value == null);
 
     setState(() {
@@ -149,11 +222,29 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
       variant: _variant!,
       manufacturingYear: DateFormat('MM-yyyy').format(_manufacturingYear!),
       ownerSerialNumber: _ownerSerialNumber!,
-      idv: _idvController.text.trim(),
+      // Pre-inspection surveys don't record a market value.
+      idv: _isValuation ? _idvController.text.trim() : '',
     );
 
     ref.read(claimFlowProvider.notifier).setOwnerVehicleDetails(details);
     context.go(AppRoutes.documentUpload);
+  }
+
+  /// Explains the suggested figure, or what is still needed to work one out.
+  String _marketValueHelper() {
+    final estimate = _estimate;
+    if (estimate == null) {
+      return 'Select product, make, model, variant and manufacturing year '
+          'to get a suggested value.';
+    }
+    final years = estimate.ageInMonths ~/ 12;
+    final months = estimate.ageInMonths % 12;
+    final age = years == 0
+        ? '$months mo'
+        : (months == 0 ? '$years yr' : '$years yr $months mo');
+    final percent = (estimate.depreciation * 100).round();
+    return 'Suggested from ex-showroom \u20B9${_rupees.format(estimate.exShowroom)}, '
+        '$age old, $percent% depreciation. You can edit it.';
   }
 
   @override
@@ -174,7 +265,15 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
                 children: [
                   _SurveyTypeField(
                     value: _surveyType,
-                    onChanged: (v) => setState(() => _surveyType = v),
+                    onChanged: (v) => setState(() {
+                      _surveyType = v;
+                      if (_isValuation) {
+                        _refreshMarketValue();
+                      } else {
+                        _idvController.clear();
+                        _errors['idv'] = null;
+                      }
+                    }),
                   ),
                   _Field(
                     label: 'Owner Name',
@@ -242,41 +341,60 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
                     items: _products,
                     error: _errors['product'],
                     onChanged: (v) => setState(() {
+                      if (v != _product) {
+                        // A different kind of vehicle has different makes.
+                        _make = null;
+                        _model = null;
+                        _variant = null;
+                      }
                       _product = v;
                       _errors['product'] = null;
+                      _refreshMarketValue();
                     }),
                   ),
                   _DropdownField(
                     label: 'Select Make',
                     placeholder: 'Select make',
                     value: _make,
-                    items: _makes,
+                    items: makesFor(_product),
                     error: _errors['make'],
                     onChanged: (v) => setState(() {
+                      if (v != _make) {
+                        _model = null;
+                        _variant = null;
+                      }
                       _make = v;
                       _errors['make'] = null;
+                      _refreshMarketValue();
                     }),
                   ),
                   _DropdownField(
                     label: 'Select Model',
-                    placeholder: 'Select model',
+                    placeholder: _make == null
+                        ? 'Select make first'
+                        : 'Select model',
                     value: _model,
-                    items: _models,
+                    items: modelsFor(_product, _make),
                     error: _errors['model'],
                     onChanged: (v) => setState(() {
+                      if (v != _model) _variant = null;
                       _model = v;
                       _errors['model'] = null;
+                      _refreshMarketValue();
                     }),
                   ),
                   _DropdownField(
                     label: 'Select Variant',
-                    placeholder: 'Select variant',
+                    placeholder: _model == null
+                        ? 'Select model first'
+                        : 'Select variant',
                     value: _variant,
-                    items: _variants,
+                    items: variantsFor(_product, _make, _model),
                     error: _errors['variant'],
                     onChanged: (v) => setState(() {
                       _variant = v;
                       _errors['variant'] = null;
+                      _refreshMarketValue();
                     }),
                   ),
                   _DateField(
@@ -298,15 +416,17 @@ class _OwnerVehicleDetailsPageState extends ConsumerState<OwnerVehicleDetailsPag
                       _errors['ownerSerialNumber'] = null;
                     }),
                   ),
-                  _Field(
-                    label: 'Present Market Value (Estimated)/ IDV',
-                    placeholder: 'Enter present market value',
-                    controller: _idvController,
-                    error: _errors['idv'],
-                    keyboardType: TextInputType.number,
-                    prefixText: '\u20B9',
-                    inputFormatterAllowed: Validators.isDigitsOnly,
-                  ),
+                  if (_isValuation)
+                    _Field(
+                      label: 'Present Market Value (Estimated)/ IDV',
+                      placeholder: 'Enter present market value',
+                      controller: _idvController,
+                      error: _errors['idv'],
+                      keyboardType: TextInputType.number,
+                      prefixText: '\u20B9',
+                      inputFormatterAllowed: Validators.isDigitsOnly,
+                      helper: _marketValueHelper(),
+                    ),
                   const SizedBox(height: 8),
                   BottomButton(label: 'Next', onPressed: _submit),
                 ],
@@ -330,10 +450,14 @@ class _Field extends StatelessWidget {
     this.prefixText,
     this.inputFormatterAllowed,
     this.textCapitalization = TextCapitalization.none,
+    this.helper,
   });
 
   final String label;
   final String placeholder;
+
+  /// Grey hint shown under the field when there is no error.
+  final String? helper;
   final TextEditingController controller;
   final String? error;
   final TextInputType? keyboardType;
@@ -349,7 +473,14 @@ class _Field extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
           const SizedBox(height: 5),
           TextField(
             controller: controller,
@@ -360,7 +491,8 @@ class _Field extends StatelessWidget {
                 ? null
                 : [
                     TextInputFormatter.withFunction((oldValue, newValue) {
-                      if (newValue.text.isEmpty || inputFormatterAllowed!(newValue.text)) {
+                      if (newValue.text.isEmpty ||
+                          inputFormatterAllowed!(newValue.text)) {
                         return newValue;
                       }
                       return oldValue;
@@ -384,25 +516,56 @@ class _Field extends StatelessWidget {
                         ),
                       ),
                     ),
-              prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+              prefixIconConstraints: const BoxConstraints(
+                minWidth: 0,
+                minHeight: 0,
+              ),
               counterText: '',
               filled: true,
               fillColor: AppColors.bgInput,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(6),
-                borderSide: BorderSide(color: error != null ? AppColors.statusPending : AppColors.borderInput),
+                borderSide: BorderSide(
+                  color: error != null
+                      ? AppColors.statusPending
+                      : AppColors.borderInput,
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(6),
-                borderSide: BorderSide(color: error != null ? AppColors.statusPending : AppColors.borderInput),
+                borderSide: BorderSide(
+                  color: error != null
+                      ? AppColors.statusPending
+                      : AppColors.borderInput,
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 10,
+              ),
             ),
           ),
           if (error != null)
             Padding(
               padding: const EdgeInsets.only(top: 4),
-              child: Text(error!, style: const TextStyle(color: AppColors.statusPending, fontSize: 14)),
+              child: Text(
+                error!,
+                style: const TextStyle(
+                  color: AppColors.statusPending,
+                  fontSize: 14,
+                ),
+              ),
+            )
+          else if (helper != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                helper!,
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                ),
+              ),
             ),
         ],
       ),
@@ -434,28 +597,61 @@ class _DropdownField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
           const SizedBox(height: 5),
           DropdownButtonFormField<String>(
+            // Drop the keyboard first; otherwise the text field that had focus
+            // gets it back when the menu closes and the keyboard pops up again
+            // over the form.
+            onTap: () => FocusScope.of(context).unfocus(),
+            key: ValueKey('$label|$value|${items.join(',')}'),
             initialValue: value,
             isExpanded: true,
-            hint: Text(placeholder, style: const TextStyle(color: AppColors.textSecondary, fontSize: 14)),
-            items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+            hint: Text(
+              placeholder,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+              ),
+            ),
+            items: items
+                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                .toList(),
             onChanged: onChanged,
             decoration: InputDecoration(
               filled: true,
               fillColor: AppColors.bgInput,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(6),
-                borderSide: BorderSide(color: error != null ? AppColors.statusPending : AppColors.borderInput),
+                borderSide: BorderSide(
+                  color: error != null
+                      ? AppColors.statusPending
+                      : AppColors.borderInput,
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 4,
+              ),
             ),
           ),
           if (error != null)
             Padding(
               padding: const EdgeInsets.only(top: 4),
-              child: Text(error!, style: const TextStyle(color: AppColors.statusPending, fontSize: 14)),
+              child: Text(
+                error!,
+                style: const TextStyle(
+                  color: AppColors.statusPending,
+                  fontSize: 14,
+                ),
+              ),
             ),
         ],
       ),
@@ -488,23 +684,50 @@ class _DateField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
           const SizedBox(height: 5),
           InkWell(
-            onTap: onTap,
+            onTap: () {
+              // Same as the dropdowns: don't let the keyboard come back
+              // after the date picker closes.
+              FocusScope.of(context).unfocus();
+              onTap();
+            },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                 color: AppColors.bgInput,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: error != null ? AppColors.statusPending : AppColors.borderInput),
+                border: Border.all(
+                  color: error != null
+                      ? AppColors.statusPending
+                      : AppColors.borderInput,
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(text.isEmpty ? placeholder : text,
-                      style: TextStyle(fontSize: 14, color: text.isEmpty ? AppColors.textSecondary : AppColors.textPrimary)),
-                  const Icon(Icons.calendar_today_outlined, size: 16, color: AppColors.textSecondary),
+                  Text(
+                    text.isEmpty ? placeholder : text,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: text.isEmpty
+                          ? AppColors.textSecondary
+                          : AppColors.textPrimary,
+                    ),
+                  ),
+                  const Icon(
+                    Icons.calendar_today_outlined,
+                    size: 16,
+                    color: AppColors.textSecondary,
+                  ),
                 ],
               ),
             ),
@@ -512,19 +735,30 @@ class _DateField extends StatelessWidget {
           if (text.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 4),
-              child: Text('Selected: $text', style: const TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+              child: Text(
+                'Selected: $text',
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 14,
+                ),
+              ),
             ),
           if (error != null && text.isEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 4),
-              child: Text(error!, style: const TextStyle(color: AppColors.statusPending, fontSize: 14)),
+              child: Text(
+                error!,
+                style: const TextStyle(
+                  color: AppColors.statusPending,
+                  fontSize: 14,
+                ),
+              ),
             ),
         ],
       ),
     );
   }
 }
-
 
 /// Survey-type radio group -- preinspection-only. Lets the agent mark whether
 /// this is a "pre inspection" or a "Valuation" survey.
@@ -586,7 +820,10 @@ class _SurveyTypeField extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         option,
-                        style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ],
                   ),

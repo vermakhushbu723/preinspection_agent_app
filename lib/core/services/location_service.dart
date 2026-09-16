@@ -4,6 +4,10 @@ import 'package:geolocator/geolocator.dart';
 /// capture (mirrors the web app's `navigator.geolocation.getCurrentPosition`
 /// usage in `CameraCapturePage.jsx` / `WalkAroundVideoPage.jsx`).
 class LocationService {
+  /// How long to wait for a fresh fix before settling for the last known one.
+  /// Indoors a high-accuracy fix can take a minute or never arrive at all.
+  static const Duration fixTimeout = Duration(seconds: 8);
+
   Future<Position?> getCurrentPosition() async {
     try {
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -18,11 +22,18 @@ class LocationService {
         return null;
       }
 
-      return await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-        ),
-      );
+      try {
+        return await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            timeLimit: fixTimeout,
+          ),
+        );
+      } catch (_) {
+        // No fresh fix in time -- the last known position is still far
+        // better than showing nothing.
+        return await Geolocator.getLastKnownPosition();
+      }
     } catch (_) {
       return null;
     }

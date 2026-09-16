@@ -31,18 +31,48 @@ const _vehicleDetails = [
   _Row(Icons.palette, Color(0xFFA855F7), 'Variant', 'DSG Automatic'),
   _Row(Icons.inventory_2_outlined, Color(0xFFF97316), 'Body Type', 'Sedan'),
   _Row(Icons.build_outlined, Color(0xFF14B8A6), 'Mfg Year', '2017'),
-  _Row(Icons.badge_outlined, Color(0xFF6366F1), 'Registration Number', 'MH 44 CD 2545'),
+  _Row(
+    Icons.badge_outlined,
+    Color(0xFF6366F1),
+    'Registration Number',
+    'MH 44 CD 2545',
+  ),
   _Row(Icons.speed, Color(0xFFEC4899), 'Odometer', 'N/A'),
   _Row(Icons.map_outlined, Color(0xFF22C55E), 'State', 'MH'),
-  _Row(Icons.calendar_today_outlined, Color(0xFFF59E0B), 'Registration Date', '17/10/2017'),
+  _Row(
+    Icons.calendar_today_outlined,
+    Color(0xFFF59E0B),
+    'Registration Date',
+    '17/10/2017',
+  ),
 ];
 
 const _insuredDetails = [
   _Row(Icons.person, Color(0xFF0EA5E9), 'Insured Name', 'User Full Name'),
-  _Row(Icons.phone_android, Color(0xFF22C55E), 'Mobile Number', '+91 1234567890'),
-  _Row(Icons.email_outlined, Color(0xFFF59E0B), 'Email Address', 'useremail@gmail.com'),
-  _Row(Icons.description_outlined, Color(0xFFA855F7), 'PI Ref.Number', '123456789CAR20'),
-  _Row(Icons.business, Color(0xFFEF4444), 'Insurance Co', 'XYZ Insurance company ltd'),
+  _Row(
+    Icons.phone_android,
+    Color(0xFF22C55E),
+    'Mobile Number',
+    '+91 1234567890',
+  ),
+  _Row(
+    Icons.email_outlined,
+    Color(0xFFF59E0B),
+    'Email Address',
+    'useremail@gmail.com',
+  ),
+  _Row(
+    Icons.description_outlined,
+    Color(0xFFA855F7),
+    'PI Ref.Number',
+    '123456789CAR20',
+  ),
+  _Row(
+    Icons.business,
+    Color(0xFFEF4444),
+    'Insurance Co',
+    'XYZ Insurance company ltd',
+  ),
 ];
 
 /// Port of `VehicleInformationPage.jsx` (Group 2 workflow branch terminal
@@ -51,10 +81,12 @@ class VehicleInformationPage extends ConsumerStatefulWidget {
   const VehicleInformationPage({super.key});
 
   @override
-  ConsumerState<VehicleInformationPage> createState() => _VehicleInformationPageState();
+  ConsumerState<VehicleInformationPage> createState() =>
+      _VehicleInformationPageState();
 }
 
-class _VehicleInformationPageState extends ConsumerState<VehicleInformationPage> {
+class _VehicleInformationPageState
+    extends ConsumerState<VehicleInformationPage> {
   String? _recommendation; // 'approved' | 'rejected'
 
   void _submit() {
@@ -64,7 +96,12 @@ class _VehicleInformationPageState extends ConsumerState<VehicleInformationPage>
         context: context,
         builder: (ctx) => AlertDialog(
           content: const Text('Please capture both signatures'),
-          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK'))],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('OK'),
+            ),
+          ],
         ),
       );
       return;
@@ -97,7 +134,14 @@ class _VehicleInformationPageState extends ConsumerState<VehicleInformationPage>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Vehicle Photos', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                      const Text(
+                        'Vehicle Photos',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
                       const SizedBox(height: 10),
                       GridView.count(
                         crossAxisCount: 3,
@@ -108,11 +152,20 @@ class _VehicleInformationPageState extends ConsumerState<VehicleInformationPage>
                         children: [
                           for (var i = 0; i < 6; i++)
                             Container(
-                              decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(8)),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF1F5F9),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
                               clipBehavior: Clip.antiAlias,
                               child: i < photoPaths.length
-                                  ? Image.file(File(photoPaths[i]), fit: BoxFit.cover)
-                                  : const Icon(Icons.photo_camera_outlined, color: Color(0xFF9CA3AF)),
+                                  ? Image.file(
+                                      File(photoPaths[i]),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : const Icon(
+                                      Icons.photo_camera_outlined,
+                                      color: Color(0xFF9CA3AF),
+                                    ),
                             ),
                         ],
                       ),
@@ -124,9 +177,17 @@ class _VehicleInformationPageState extends ConsumerState<VehicleInformationPage>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Vehicle Details', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                      const Text(
+                        'Vehicle Details',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
                       const SizedBox(height: 12),
-                      for (final row in _vehicleDetails) _InformationRow(row: row),
+                      for (final row in _vehicleDetails)
+                        _InformationRow(row: row),
                     ],
                   ),
                 ),
@@ -135,9 +196,17 @@ class _VehicleInformationPageState extends ConsumerState<VehicleInformationPage>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Insured Details', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                      const Text(
+                        'Insured Details',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
                       const SizedBox(height: 12),
-                      for (final row in _insuredDetails) _InformationRow(row: row),
+                      for (final row in _insuredDetails)
+                        _InformationRow(row: row),
                     ],
                   ),
                 ),
@@ -149,9 +218,12 @@ class _VehicleInformationPageState extends ConsumerState<VehicleInformationPage>
                   icon: Icons.person,
                   accepted: flow.customerDeclarationAccepted,
                   value: flow.customerSignature,
-                  onChanged: (bytes) => ref.read(claimFlowProvider.notifier).setCustomerSignature(bytes),
+                  onChanged: (bytes) => ref
+                      .read(claimFlowProvider.notifier)
+                      .setCustomerSignature(bytes),
                   declarationLabel: 'Customer Declaration',
-                  onDeclarationTap: () => context.push(AppRoutes.customerDeclaration),
+                  onDeclarationTap: () =>
+                      context.push(AppRoutes.customerDeclaration),
                 ),
                 _SignatureSection(
                   title: 'Inspection agent signature',
@@ -161,9 +233,12 @@ class _VehicleInformationPageState extends ConsumerState<VehicleInformationPage>
                   icon: Icons.edit,
                   accepted: flow.inspectorDeclarationAccepted,
                   value: flow.inspectorSignature,
-                  onChanged: (bytes) => ref.read(claimFlowProvider.notifier).setInspectorSignature(bytes),
+                  onChanged: (bytes) => ref
+                      .read(claimFlowProvider.notifier)
+                      .setInspectorSignature(bytes),
                   declarationLabel: 'Inspector Declaration',
-                  onDeclarationTap: () => context.push(AppRoutes.inspectorDeclaration),
+                  onDeclarationTap: () =>
+                      context.push(AppRoutes.inspectorDeclaration),
                 ),
                 _Card(
                   padding: const EdgeInsets.all(18),
@@ -178,14 +253,23 @@ class _VehicleInformationPageState extends ConsumerState<VehicleInformationPage>
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: const Color(0xFFDCFCE7),
-                              border: Border.all(color: const Color(0xFF22C55E)),
+                              border: Border.all(
+                                color: const Color(0xFF22C55E),
+                              ),
                             ),
                             child: Center(
                               child: Container(
                                 width: 24,
                                 height: 24,
-                                decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF22C55E)),
-                                child: const Icon(Icons.check, size: 14, color: Colors.white),
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Color(0xFF22C55E),
+                                ),
+                                child: const Icon(
+                                  Icons.check,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ),
@@ -194,9 +278,23 @@ class _VehicleInformationPageState extends ConsumerState<VehicleInformationPage>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: const [
-                                Text('Recommendation', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                                Text(
+                                  'Recommendation',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
                                 SizedBox(height: 4),
-                                Text('Is this Preinspection recommended?', style: TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4)),
+                                Text(
+                                  'Is this Preinspection recommended?',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.textSecondary,
+                                    height: 1.4,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -204,14 +302,16 @@ class _VehicleInformationPageState extends ConsumerState<VehicleInformationPage>
                             label: 'Yes',
                             color: const Color(0xFF22C55E),
                             selected: _recommendation == 'approved',
-                            onTap: () => setState(() => _recommendation = 'approved'),
+                            onTap: () =>
+                                setState(() => _recommendation = 'approved'),
                           ),
                           const SizedBox(width: 8),
                           _RecommendationRadio(
                             label: 'No',
                             color: const Color(0xFFEF4444),
                             selected: _recommendation == 'rejected',
-                            onTap: () => setState(() => _recommendation = 'rejected'),
+                            onTap: () =>
+                                setState(() => _recommendation = 'rejected'),
                           ),
                         ],
                       ),
@@ -223,11 +323,23 @@ class _VehicleInformationPageState extends ConsumerState<VehicleInformationPage>
                               onPressed: () => Navigator.of(context).maybePop(),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: const Color(0xFF0F172A),
-                                side: const BorderSide(color: Color(0xFFCBD5E1)),
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                side: const BorderSide(
+                                  color: Color(0xFFCBD5E1),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
-                              child: const Text('Restart Survey', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                              child: const Text(
+                                'Restart Survey',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -237,10 +349,20 @@ class _VehicleInformationPageState extends ConsumerState<VehicleInformationPage>
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.btnPrimary,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
-                              child: const Text('Submit Survey', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                              child: const Text(
+                                'Submit Survey',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -288,7 +410,9 @@ class _InformationRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Container(
         padding: const EdgeInsets.only(bottom: 12),
-        decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB)))),
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
+        ),
         child: Row(
           children: [
             Container(
@@ -302,8 +426,27 @@ class _InformationRow extends StatelessWidget {
               child: Icon(row.icon, size: 16, color: row.color),
             ),
             const SizedBox(width: 12),
-            SizedBox(width: 120, child: Text(row.label, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500))),
-            Expanded(child: Text(row.value, style: const TextStyle(fontSize: 14, color: AppColors.textPrimary, fontWeight: FontWeight.w600))),
+            SizedBox(
+              width: 120,
+              child: Text(
+                row.label,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Text(
+                row.value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -312,7 +455,12 @@ class _InformationRow extends StatelessWidget {
 }
 
 class _RecommendationRadio extends StatelessWidget {
-  const _RecommendationRadio({required this.label, required this.color, required this.selected, required this.onTap});
+  const _RecommendationRadio({
+    required this.label,
+    required this.color,
+    required this.selected,
+    required this.onTap,
+  });
   final String label;
   final Color color;
   final bool selected;
@@ -335,7 +483,14 @@ class _RecommendationRadio extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 6),
-          Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
         ],
       ),
     );
@@ -385,7 +540,10 @@ class _SignatureSectionState extends State<_SignatureSection> {
     if (_padController.isEmpty || bytes == null) return;
     widget.onChanged(bytes);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Signature saved'), duration: Duration(seconds: 2)),
+      const SnackBar(
+        content: Text('Signature saved'),
+        duration: Duration(seconds: 2),
+      ),
     );
   }
 
@@ -401,7 +559,10 @@ class _SignatureSectionState extends State<_SignatureSection> {
               Container(
                 width: 36,
                 height: 36,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: widget.iconBg),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: widget.iconBg,
+                ),
                 child: Icon(widget.icon, size: 18, color: widget.iconColor),
               ),
               const SizedBox(width: 12),
@@ -409,15 +570,38 @@ class _SignatureSectionState extends State<_SignatureSection> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(widget.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                    Text(widget.subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    Text(
+                      widget.title,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      widget.subtitle,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                   ],
                 ),
               ),
               TextButton(
                 onPressed: _padController.undo,
-                style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
-                child: const Text('Undo', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                ),
+                child: const Text(
+                  'Undo',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
               ),
             ],
           ),
@@ -437,13 +621,20 @@ class _SignatureSectionState extends State<_SignatureSection> {
                   child: GestureDetector(
                     onTap: widget.onDeclarationTap,
                     child: Container(
-                      decoration: BoxDecoration(color: const Color(0xE0F1F5F9), borderRadius: BorderRadius.circular(8)),
+                      decoration: BoxDecoration(
+                        color: const Color(0xE0F1F5F9),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       alignment: Alignment.center,
                       padding: const EdgeInsets.all(12),
                       child: Text(
                         'Accept the ${widget.declarationLabel} to sign here',
                         textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ),
                   ),
@@ -457,8 +648,18 @@ class _SignatureSectionState extends State<_SignatureSection> {
               children: [
                 TextButton(
                   onPressed: widget.onDeclarationTap,
-                  style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
-                  child: Text(widget.declarationLabel, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF2563EB))),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                  ),
+                  child: Text(
+                    widget.declarationLabel,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2563EB),
+                    ),
+                  ),
                 ),
                 GestureDetector(
                   onTap: widget.onDeclarationTap,
@@ -468,10 +669,21 @@ class _SignatureSectionState extends State<_SignatureSection> {
                       SizedBox(
                         width: 18,
                         height: 18,
-                        child: Checkbox(value: widget.accepted, onChanged: null, materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                        child: Checkbox(
+                          value: widget.accepted,
+                          onChanged: null,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                        ),
                       ),
                       const SizedBox(width: 8),
-                      const Text('I Agree', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      const Text(
+                        'I Agree',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -489,10 +701,18 @@ class _SignatureSectionState extends State<_SignatureSection> {
                       backgroundColor: const Color(0xFFE5F2FF),
                       foregroundColor: const Color(0xFF0D6EFD),
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                       elevation: 0,
                     ),
-                    child: const Text('Clear', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      'Clear',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -501,12 +721,22 @@ class _SignatureSectionState extends State<_SignatureSection> {
                     onPressed: widget.accepted ? _save : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.btnPrimary,
-                      disabledBackgroundColor: AppColors.btnPrimary.withValues(alpha: 0.6),
+                      disabledBackgroundColor: AppColors.btnPrimary.withValues(
+                        alpha: 0.6,
+                      ),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                    child: const Text('Save', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      'Save',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ],

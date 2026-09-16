@@ -26,7 +26,9 @@ const _staticRoutes = [
 ];
 
 void main() {
-  testWidgets('every PreinspectionAgent route resolves to a page', (tester) async {
+  testWidgets('every PreinspectionAgent route resolves to a page', (
+    tester,
+  ) async {
     // A fresh router per test -- reusing the shared `appRouter` singleton
     // (and its internal Navigator GlobalKey) across more than one
     // `pumpWidget` in the same test file corrupts the element tree.
@@ -43,11 +45,17 @@ void main() {
       // pumpAndSettle wait forever for animations to stop.
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.byType(Scaffold), findsWidgets, reason: 'route $path did not render a Scaffold');
+      expect(
+        find.byType(Scaffold),
+        findsWidgets,
+        reason: 'route $path did not render a Scaffold',
+      );
     }
   });
 
-  testWidgets('camera-capture route accepts an angle path parameter', (tester) async {
+  testWidgets('camera-capture route accepts an angle path parameter', (
+    tester,
+  ) async {
     final router = createAppRouter();
     await tester.pumpWidget(
       ProviderScope(child: MaterialApp.router(routerConfig: router)),

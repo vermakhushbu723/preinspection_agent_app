@@ -27,19 +27,46 @@ class _Instruction {
 const _instructionSeconds = 10;
 
 const _instructions = [
-  _Instruction('WALK AROUND', 'Front + Number Plate',
-      'Open the driver-side door, sit in the driver seat, and record the inside view of the front windshield clearly.'),
-  _Instruction('WALK AROUND', 'Inside The Car',
-      'Record both sides of the RC (Registration Certificate) clearly. (Mandatory)'),
-  _Instruction('WALK AROUND', 'Inside The Car', 'Record the Insurance Policy clearly, if available.'),
-  _Instruction('WALK AROUND', 'Inside The Car', 'Start the engine and record the odometer reading clearly.'),
-  _Instruction('WALK AROUND', 'Inside The Car',
-      'Open the bonnet, record the chassis number clearly, and capture the complete engine compartment.'),
-  _Instruction('WALK AROUND', 'Out side The Car',
-      'Take a close-up video of the damaged portion clearly from multiple angles.'),
-  _Instruction('WALK AROUND', 'Out side The Car',
-      'Walk around the vehicle and record all four sides — front, rear, left and right.'),
-  _Instruction('WALK AROUND', 'Out side The Car', 'Record the rear of the vehicle including the number plate clearly.'),
+  _Instruction(
+    'WALK AROUND',
+    'Front + Number Plate',
+    'Open the driver-side door, sit in the driver seat, and record the inside view of the front windshield clearly.',
+  ),
+  _Instruction(
+    'WALK AROUND',
+    'Inside The Car',
+    'Record both sides of the RC (Registration Certificate) clearly. (Mandatory)',
+  ),
+  _Instruction(
+    'WALK AROUND',
+    'Inside The Car',
+    'Record the Insurance Policy clearly, if available.',
+  ),
+  _Instruction(
+    'WALK AROUND',
+    'Inside The Car',
+    'Start the engine and record the odometer reading clearly.',
+  ),
+  _Instruction(
+    'WALK AROUND',
+    'Inside The Car',
+    'Open the bonnet, record the chassis number clearly, and capture the complete engine compartment.',
+  ),
+  _Instruction(
+    'WALK AROUND',
+    'Out side The Car',
+    'Take a close-up video of the damaged portion clearly from multiple angles.',
+  ),
+  _Instruction(
+    'WALK AROUND',
+    'Out side The Car',
+    'Walk around the vehicle and record all four sides — front, rear, left and right.',
+  ),
+  _Instruction(
+    'WALK AROUND',
+    'Out side The Car',
+    'Record the rear of the vehicle including the number plate clearly.',
+  ),
 ];
 
 final _totalSeconds = _instructionSeconds * _instructions.length;
@@ -56,7 +83,8 @@ class WalkAroundVideoPage extends ConsumerStatefulWidget {
   const WalkAroundVideoPage({super.key});
 
   @override
-  ConsumerState<WalkAroundVideoPage> createState() => _WalkAroundVideoPageState();
+  ConsumerState<WalkAroundVideoPage> createState() =>
+      _WalkAroundVideoPageState();
 }
 
 class _WalkAroundVideoPageState extends ConsumerState<WalkAroundVideoPage> {
@@ -78,7 +106,10 @@ class _WalkAroundVideoPageState extends ConsumerState<WalkAroundVideoPage> {
   bool _initializing = true;
   String? _error;
 
-  int get _currentStep => (_elapsedSeconds ~/ _instructionSeconds).clamp(0, _instructions.length - 1);
+  int get _currentStep => (_elapsedSeconds ~/ _instructionSeconds).clamp(
+    0,
+    _instructions.length - 1,
+  );
 
   @override
   void initState() {
@@ -91,7 +122,10 @@ class _WalkAroundVideoPageState extends ConsumerState<WalkAroundVideoPage> {
     try {
       _controller = await _cameraService.initialize(enableAudio: true);
     } catch (e) {
-      setState(() => _error = 'Camera & mic permission denied. Allow access and try again.');
+      setState(
+        () => _error =
+            'Camera & mic permission denied. Allow access and try again.',
+      );
     }
     _position = await _locationService.getCurrentPosition();
     _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -173,31 +207,34 @@ class _WalkAroundVideoPageState extends ConsumerState<WalkAroundVideoPage> {
                   children: [
                     Icon(Icons.videocam, color: Colors.white, size: 40),
                     SizedBox(height: 12),
-                    Text('Opening camera...', style: TextStyle(color: Colors.white, fontSize: 16)),
+                    Text(
+                      'Opening camera...',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
                   ],
                 ),
               )
             : _error != null
-                ? _ErrorView(message: _error!, onBack: () => context.pop(false))
-                : _playbackController != null
-                    ? _PlaybackView(
-                        controller: _playbackController!,
-                        onRetake: _retake,
-                        onSave: _save,
-                      )
-                    : _RecordingView(
-                        controller: _controller!,
-                        isRecording: _isRecording,
-                        elapsedSeconds: _elapsedSeconds,
-                        recBlink: _recBlink,
-                        currentStep: _currentStep,
-                        position: _position,
-                        now: _now,
-                        locationService: _locationService,
-                        onStart: _startRecording,
-                        onStop: _stopRecording,
-                        onBack: () => context.pop(false),
-                      ),
+            ? _ErrorView(message: _error!, onBack: () => context.pop(false))
+            : _playbackController != null
+            ? _PlaybackView(
+                controller: _playbackController!,
+                onRetake: _retake,
+                onSave: _save,
+              )
+            : _RecordingView(
+                controller: _controller!,
+                isRecording: _isRecording,
+                elapsedSeconds: _elapsedSeconds,
+                recBlink: _recBlink,
+                currentStep: _currentStep,
+                position: _position,
+                now: _now,
+                locationService: _locationService,
+                onStart: _startRecording,
+                onStop: _stopRecording,
+                onBack: () => context.pop(false),
+              ),
       ),
     );
   }
@@ -260,8 +297,11 @@ class _RecordingView extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(6),
             ),
-            child: SvgPicture.asset('assets/icons/rightlogo.svg', height: 44,
-                placeholderBuilder: (_) => const SizedBox(height: 44, width: 44)),
+            child: SvgPicture.asset(
+              'assets/icons/rightlogo.svg',
+              height: 44,
+              placeholderBuilder: (_) => const SizedBox(height: 44, width: 44),
+            ),
           ),
         ),
         Positioned(
@@ -273,8 +313,14 @@ class _RecordingView extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(color: const Color(0xFFEF4444), borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEF4444),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -283,23 +329,41 @@ class _RecordingView extends StatelessWidget {
                         height: 8,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white.withValues(alpha: recBlink ? 1 : 0.25),
+                          color: Colors.white.withValues(
+                            alpha: recBlink ? 1 : 0.25,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 6),
-                      const Text('REC', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                      const Text(
+                        'REC',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xD93C3C3C),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Text(_formatClock(elapsedSeconds),
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                  child: Text(
+                    _formatClock(elapsedSeconds),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -311,16 +375,35 @@ class _RecordingView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(stepLabel,
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 12, fontWeight: FontWeight.w600)),
+              Text(
+                stepLabel,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.85), width: 1.5),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.85),
+                    width: 1.5,
+                  ),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Text(current.sub, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800)),
+                child: Text(
+                  current.sub,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
             ],
           ),
@@ -337,16 +420,36 @@ class _RecordingView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(current.desc,
-                      style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600, height: 1.3)),
+                  child: Text(
+                    current.desc,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      height: 1.3,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('Date: $_dateTime', style: TextStyle(color: Colors.white.withValues(alpha: 0.95), fontSize: 10)),
+                    Text(
+                      'Date: $_dateTime',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.95),
+                        fontSize: 10,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Text(_geoTag, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                    Text(
+                      _geoTag,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -367,7 +470,10 @@ class _RecordingView extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.white,
-                    border: Border.all(color: const Color(0xFFEF4444), width: 5),
+                    border: Border.all(
+                      color: const Color(0xFFEF4444),
+                      width: 5,
+                    ),
                   ),
                 ),
               ),
@@ -380,14 +486,27 @@ class _RecordingView extends StatelessWidget {
             child: GestureDetector(
               onTap: onStop,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                decoration: BoxDecoration(color: const Color(0xFFEF4444), borderRadius: BorderRadius.circular(999)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEF4444),
+                  borderRadius: BorderRadius.circular(999),
+                ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.stop, color: Colors.white, size: 16),
                     SizedBox(width: 6),
-                    Text('Stop & Finish', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                    Text(
+                      'Stop & Finish',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -399,7 +518,11 @@ class _RecordingView extends StatelessWidget {
 }
 
 class _PlaybackView extends StatefulWidget {
-  const _PlaybackView({required this.controller, required this.onRetake, required this.onSave});
+  const _PlaybackView({
+    required this.controller,
+    required this.onRetake,
+    required this.onSave,
+  });
 
   final VideoPlayerController controller;
   final VoidCallback onRetake;
@@ -434,7 +557,9 @@ class _PlaybackViewState extends State<_PlaybackView> {
       fit: StackFit.expand,
       children: [
         GestureDetector(
-          onTap: () => controller.value.isPlaying ? controller.pause() : controller.play(),
+          onTap: () => controller.value.isPlaying
+              ? controller.pause()
+              : controller.play(),
           child: Center(
             child: AspectRatio(
               aspectRatio: controller.value.aspectRatio,
@@ -448,16 +573,29 @@ class _PlaybackViewState extends State<_PlaybackView> {
           bottom: 106,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.65), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.65),
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 SliderTheme(
                   data: SliderTheme.of(context).copyWith(trackHeight: 2),
                   child: Slider(
-                    value: position.inMilliseconds.toDouble().clamp(0, duration.inMilliseconds.toDouble().clamp(1, double.infinity)),
-                    max: duration.inMilliseconds.toDouble().clamp(1, double.infinity),
-                    onChanged: (v) => controller.seekTo(Duration(milliseconds: v.round())),
+                    value: position.inMilliseconds.toDouble().clamp(
+                      0,
+                      duration.inMilliseconds.toDouble().clamp(
+                        1,
+                        double.infinity,
+                      ),
+                    ),
+                    max: duration.inMilliseconds.toDouble().clamp(
+                      1,
+                      double.infinity,
+                    ),
+                    onChanged: (v) =>
+                        controller.seekTo(Duration(milliseconds: v.round())),
                     activeColor: AppColors.btnPrimary,
                     inactiveColor: Colors.white24,
                   ),
@@ -466,12 +604,24 @@ class _PlaybackViewState extends State<_PlaybackView> {
                   children: [
                     IconButton(
                       padding: EdgeInsets.zero,
-                      icon: Icon(controller.value.isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white, size: 22),
-                      onPressed: () => controller.value.isPlaying ? controller.pause() : controller.play(),
+                      icon: Icon(
+                        controller.value.isPlaying
+                            ? Icons.pause
+                            : Icons.play_arrow,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                      onPressed: () => controller.value.isPlaying
+                          ? controller.pause()
+                          : controller.play(),
                     ),
                     IconButton(
                       padding: EdgeInsets.zero,
-                      icon: const Icon(Icons.replay, color: Colors.white, size: 18),
+                      icon: const Icon(
+                        Icons.replay,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                       onPressed: () {
                         controller.seekTo(Duration.zero);
                         controller.play();
@@ -485,11 +635,15 @@ class _PlaybackViewState extends State<_PlaybackView> {
                     IconButton(
                       padding: EdgeInsets.zero,
                       icon: Icon(
-                        controller.value.volume == 0 ? Icons.volume_off : Icons.volume_up,
+                        controller.value.volume == 0
+                            ? Icons.volume_off
+                            : Icons.volume_up,
                         color: Colors.white,
                         size: 18,
                       ),
-                      onPressed: () => controller.setVolume(controller.value.volume == 0 ? 1 : 0),
+                      onPressed: () => controller.setVolume(
+                        controller.value.volume == 0 ? 1 : 0,
+                      ),
                     ),
                     SizedBox(
                       width: 80,
@@ -518,10 +672,15 @@ class _PlaybackViewState extends State<_PlaybackView> {
                     backgroundColor: const Color(0xFFEF4444),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   onPressed: widget.onRetake,
-                  child: const Text('Retake', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  child: const Text(
+                    'Retake',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -531,10 +690,15 @@ class _PlaybackViewState extends State<_PlaybackView> {
                     backgroundColor: AppColors.btnPrimary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   onPressed: widget.onSave,
-                  child: const Text('Save & Continue', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  child: const Text(
+                    'Save & Continue',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                 ),
               ),
             ],
@@ -560,18 +724,33 @@ class _ErrorView extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.all(24),
         constraints: const BoxConstraints(maxWidth: 360),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.camera_alt, size: 48, color: Color(0xFFDC2626)),
             const SizedBox(height: 8),
-            const Text('Camera Access Required',
-                style: TextStyle(color: Color(0xFFDC2626), fontWeight: FontWeight.bold, fontSize: 18)),
+            const Text(
+              'Camera Access Required',
+              style: TextStyle(
+                color: Color(0xFFDC2626),
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text(message,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFF374151), fontSize: 13, height: 1.6)),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF374151),
+                fontSize: 13,
+                height: 1.6,
+              ),
+            ),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -581,9 +760,14 @@ class _ErrorView extends StatelessWidget {
                   backgroundColor: AppColors.btnPrimary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-                child: const Text('Go Back', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                child: const Text(
+                  'Go Back',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
               ),
             ),
           ],

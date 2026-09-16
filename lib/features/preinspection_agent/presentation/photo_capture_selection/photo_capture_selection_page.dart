@@ -29,21 +29,34 @@ class _PhotoPoint {
   final double left; // fraction 0..1 of the diagram box
 }
 
-/// The eight walk-around angles, numbered in shooting order and spaced evenly
-/// around an ellipse so no two markers (or their captions) can collide.
+/// The eight walk-around angles, each placed at the part of the vehicle it
+/// photographs, and numbered in the order an agent walks round the vehicle.
+///
+/// Every centre image (car, bike, truck) is drawn in the same front-left
+/// three-quarter view: the front faces the lower left, the rear is at the
+/// upper right, and the long side you can see is the vehicle's **left** —
+/// the project's own `Left.png` guide has the front on the left of the frame
+/// in exactly that way. The right-hand side is the hidden far side, so its
+/// markers sit up and to the left, behind the roof line:
+///
+/// ```
+///              RH Side     Rear RH      Rear
+///   Front RH                                    Rear LH
+///              Front       Front LH     LH Side
+/// ```
 ///
 /// Odometer, chassis number and the walk-around video are not on the ring —
 /// they are close-ups rather than positions around the vehicle, so they sit
 /// in their own strip along the bottom.
 const _ringPoints = [
-  _PhotoPoint('front-side', 'Front', 1, 0.50, 0.05),
-  _PhotoPoint('front-rh-side', 'Front RH', 2, 0.20, 0.18),
-  _PhotoPoint('rh-side', 'RH Side', 3, 0.06, 0.50),
-  _PhotoPoint('rear-rh-side', 'Rear RH', 4, 0.20, 0.82),
-  _PhotoPoint('rear-side', 'Rear', 5, 0.50, 0.95),
-  _PhotoPoint('lh-side', 'LH Side', 6, 0.94, 0.50),
-  _PhotoPoint('front-lh', 'Front LH', 7, 0.80, 0.18),
-  _PhotoPoint('rear-lh-side', 'Rear LH', 8, 0.80, 0.82),
+  _PhotoPoint('front-side', 'Front', 1, 0.88, 0.14),
+  _PhotoPoint('front-rh-side', 'Front RH', 2, 0.50, 0.03),
+  _PhotoPoint('rh-side', 'RH Side', 3, 0.12, 0.14),
+  _PhotoPoint('rear-rh-side', 'Rear RH', 4, 0.04, 0.50),
+  _PhotoPoint('rear-side', 'Rear', 5, 0.12, 0.86),
+  _PhotoPoint('rear-lh-side', 'Rear LH', 6, 0.50, 0.97),
+  _PhotoPoint('lh-side', 'LH Side', 7, 0.88, 0.86),
+  _PhotoPoint('front-lh', 'Front LH', 8, 0.96, 0.50),
 ];
 
 /// The close-up shots and the walk-around video, shown as cards under the
@@ -214,9 +227,9 @@ class _VehicleDiagram extends StatelessWidget {
   final ClaimFlowState flow;
   final ValueChanged<String> onTapPoint;
 
-  /// Captions sit under their marker, so only half a caption's width has to
-  /// be kept clear on each side — the wide pills beside each circle were
-  /// what used to overlap each other and swallow the vehicle.
+  /// Captions sit centred on their marker, so only half a caption's width
+  /// has to be kept clear on each side — the wide pills beside each circle
+  /// were what used to overlap each other and swallow the vehicle.
   static const double _captionWidth = 74;
 
   @override
@@ -228,9 +241,11 @@ class _VehicleDiagram extends StatelessWidget {
         final markerSize = (math.min(w, h) * 0.13).clamp(34.0, 52.0);
 
         final marginX = _captionWidth / 2 + 4;
-        final marginY = markerSize / 2 + 8;
+        // Top-row captions sit above their marker and the rest below, so
+        // reserve a caption's height on both edges.
+        final marginY = markerSize / 2 + 10 + _MarkerCaption.height;
         final iw = w - 2 * marginX;
-        final ih = h - 2 * marginY - _MarkerCaption.height;
+        final ih = h - 2 * marginY;
 
         return Stack(
           children: [
@@ -260,8 +275,8 @@ class _VehicleDiagram extends StatelessWidget {
                     child: Image.asset(
                       VehicleAssets.centerImage(category),
                       fit: BoxFit.contain,
-                      height: ih * 0.82,
-                      width: iw * 0.60,
+                      height: ih * 0.70,
+                      width: iw * 0.62,
                       errorBuilder: (_, _, _) =>
                           const Icon(Icons.directions_car, size: 96),
                     ),
@@ -330,7 +345,8 @@ class _LeaderLinePainter extends CustomPainter {
       oldDelegate.done != done || oldDelegate.markerRadius != markerRadius;
 }
 
-/// One numbered capture marker with its caption underneath.
+/// One numbered capture marker with its caption (above for the top row,
+/// below for everything else).
 class _Marker extends StatelessWidget {
   const _Marker({
     required this.point,
@@ -409,7 +425,11 @@ class _Marker extends StatelessWidget {
               ),
             ),
             Positioned(
-              top: size + 2,
+              // Top-row captions go above the marker: underneath, they would
+              // run into the vehicle.
+              top: point.top < 0.3 ? null : size + 2,
+              // Clear of the number badge, which sticks out above the circle.
+              bottom: point.top < 0.3 ? size + 8 : null,
               child: _MarkerCaption(
                 label: point.label,
                 color: color,

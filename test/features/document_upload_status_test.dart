@@ -22,8 +22,9 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('document upload status', () {
-    testWidgets('every document reads Pending before anything is uploaded',
-        (tester) async {
+    testWidgets('every document reads Pending before anything is uploaded', (
+      tester,
+    ) async {
       _useTallSurface(tester);
       await tester.pumpWidget(_wrap(const DocumentUploadPage()));
       await tester.pump();
@@ -34,8 +35,9 @@ void main() {
       expect(find.text('0 / 6'), findsOneWidget);
     });
 
-    testWidgets('a document flips to Submitted once its upload is recorded',
-        (tester) async {
+    testWidgets('a document flips to Submitted once its upload is recorded', (
+      tester,
+    ) async {
       _useTallSurface(tester);
       final container = ProviderContainer();
       addTearDown(container.dispose);
@@ -58,30 +60,32 @@ void main() {
   });
 
   group('document picker modal', () {
-    testWidgets('front/back sheet offers a Save button, disabled until a side is captured',
-        (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: DocumentPickerModal(
-              docName: 'Driving License',
-              mode: DocPickerMode.frontBack,
-              source: ImageSource.camera,
-              onSaveSides: (_) {},
+    testWidgets(
+      'front/back sheet offers a Save button, disabled until a side is captured',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DocumentPickerModal(
+                docName: 'Driving License',
+                mode: DocPickerMode.frontBack,
+                source: ImageSource.camera,
+                onSaveSides: (_) {},
+              ),
             ),
           ),
-        ),
-      );
-      await tester.pump();
+        );
+        await tester.pump();
 
-      expect(find.text('Front Side'), findsOneWidget);
-      expect(find.text('Back Side'), findsOneWidget);
+        expect(find.text('Front Side'), findsOneWidget);
+        expect(find.text('Back Side'), findsOneWidget);
 
-      final saveButton = find.widgetWithText(ElevatedButton, 'Save');
-      expect(saveButton, findsOneWidget);
-      // Nothing captured yet -> Save stays disabled so nothing can be
-      // recorded (and no document can flip to Submitted) by accident.
-      expect(tester.widget<ElevatedButton>(saveButton).onPressed, isNull);
-    });
+        final saveButton = find.widgetWithText(ElevatedButton, 'Save');
+        expect(saveButton, findsOneWidget);
+        // Nothing captured yet -> Save stays disabled so nothing can be
+        // recorded (and no document can flip to Submitted) by accident.
+        expect(tester.widget<ElevatedButton>(saveButton).onPressed, isNull);
+      },
+    );
   });
 }

@@ -87,7 +87,9 @@ class _SignaturePadState extends State<SignaturePad> {
     // The owner dropped the signature (e.g. it was cleared elsewhere, or the
     // flow was reset) -- drop the ink with it, otherwise the pad keeps
     // showing a signature the rest of the app no longer has.
-    if (widget.value == null && oldWidget.value != null && _strokes.isNotEmpty) {
+    if (widget.value == null &&
+        oldWidget.value != null &&
+        _strokes.isNotEmpty) {
       setState(_strokes.clear);
     }
   }
@@ -120,7 +122,8 @@ class _SignaturePadState extends State<SignaturePad> {
 
   Future<Uint8List?> exportPng() async {
     final boundary =
-        _repaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+        _repaintKey.currentContext?.findRenderObject()
+            as RenderRepaintBoundary?;
     if (boundary == null) return null;
     final image = await boundary.toImage(pixelRatio: 2.0);
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
@@ -180,13 +183,15 @@ class _SignaturePadState extends State<SignaturePad> {
                   child: RawGestureDetector(
                     gestures: {
                       _PadPanGestureRecognizer:
-                          GestureRecognizerFactoryWithHandlers<_PadPanGestureRecognizer>(
-                        () => _PadPanGestureRecognizer(debugOwner: this),
-                        (recognizer) => recognizer
-                          ..onStart = _onPanStart
-                          ..onUpdate = _onPanUpdate
-                          ..onEnd = _onPanEnd,
-                      ),
+                          GestureRecognizerFactoryWithHandlers<
+                            _PadPanGestureRecognizer
+                          >(
+                            () => _PadPanGestureRecognizer(debugOwner: this),
+                            (recognizer) => recognizer
+                              ..onStart = _onPanStart
+                              ..onUpdate = _onPanUpdate
+                              ..onEnd = _onPanEnd,
+                          ),
                     },
                     child: CustomPaint(
                       size: Size.infinite,

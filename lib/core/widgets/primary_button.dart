@@ -34,9 +34,7 @@ class PrimaryButton extends StatelessWidget {
           disabledBackgroundColor: const Color(0xFF01A0FE),
           disabledForegroundColor: Colors.white,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(7),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
           elevation: 0,
         ),
         child: Text(

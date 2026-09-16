@@ -157,7 +157,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         ),
                         if (session != null)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.18),
                               borderRadius: BorderRadius.circular(999),
@@ -179,7 +182,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       width: double.infinity,
                       decoration: const BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(20),
+                        ),
                       ),
                       padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
                       child: SingleChildScrollView(
@@ -192,14 +197,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               padding: EdgeInsets.zero,
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                mainAxisSpacing: 10,
-                                crossAxisSpacing: 10,
-                                // Fixed height, not an aspect ratio: the label
-                                // can wrap to two lines and must still fit
-                                // inside the card on any screen width.
-                                mainAxisExtent: 88,
-                              ),
+                                    crossAxisCount: 2,
+                                    mainAxisSpacing: 10,
+                                    crossAxisSpacing: 10,
+                                    // Fixed height, not an aspect ratio: the label
+                                    // can wrap to two lines and must still fit
+                                    // inside the card on any screen width.
+                                    mainAxisExtent: 88,
+                                  ),
                               children: [
                                 _StatCard(
                                   icon: Icons.description_outlined,
@@ -208,25 +213,34 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   gradient: AppColors.cardTotalClaims,
                                   textColor: Colors.white,
                                   selected: _view == _DashboardView.total,
-                                  onTap: () => _selectView(_DashboardView.total),
+                                  onTap: () =>
+                                      _selectView(_DashboardView.total),
                                 ),
                                 _StatCard(
                                   icon: Icons.task_alt,
-                                  count: _completedCount.toString().padLeft(2, '0'),
+                                  count: _completedCount.toString().padLeft(
+                                    2,
+                                    '0',
+                                  ),
                                   label: 'Completed',
                                   gradient: AppColors.cardSurveyCompleted,
                                   textColor: const Color(0xFF009348),
                                   selected: _view == _DashboardView.completed,
-                                  onTap: () => _selectView(_DashboardView.completed),
+                                  onTap: () =>
+                                      _selectView(_DashboardView.completed),
                                 ),
                                 _StatCard(
                                   icon: Icons.pending_actions,
-                                  count: _pendingCount.toString().padLeft(2, '0'),
+                                  count: _pendingCount.toString().padLeft(
+                                    2,
+                                    '0',
+                                  ),
                                   label: 'Pending',
                                   color: AppColors.cardPendingSurvey,
                                   textColor: Colors.white,
                                   selected: _view == _DashboardView.pending,
-                                  onTap: () => _selectView(_DashboardView.pending),
+                                  onTap: () =>
+                                      _selectView(_DashboardView.pending),
                                 ),
                                 _StatCard(
                                   icon: Icons.search,
@@ -235,36 +249,51 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   gradient: AppColors.cardSearchClaim,
                                   textColor: Colors.white,
                                   selected: _view == _DashboardView.search,
-                                  onTap: () => _selectView(_DashboardView.search),
+                                  onTap: () =>
+                                      _selectView(_DashboardView.search),
                                 ),
                               ],
                             ),
                             if (_view == _DashboardView.search) ...[
                               const SizedBox(height: 12),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
                                 decoration: BoxDecoration(
                                   color: AppColors.bgInput,
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: AppColors.borderInput),
+                                  border: Border.all(
+                                    color: AppColors.borderInput,
+                                  ),
                                 ),
                                 child: Row(
                                   children: [
-                                    const Icon(Icons.search, size: 18, color: AppColors.textSecondary),
+                                    const Icon(
+                                      Icons.search,
+                                      size: 18,
+                                      color: AppColors.textSecondary,
+                                    ),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: TextField(
                                         controller: _searchController,
-                                        onChanged: (v) => setState(() => _query = v),
+                                        onChanged: (v) =>
+                                            setState(() => _query = v),
                                         decoration: const InputDecoration(
-                                          hintText: 'Search PI ref. number, reg. no., name…',
+                                          hintText:
+                                              'Search PI ref. number, reg. no., name…',
                                           border: InputBorder.none,
                                         ),
                                       ),
                                     ),
                                     if (_query.isNotEmpty)
                                       IconButton(
-                                        icon: const Icon(Icons.close, size: 18, color: AppColors.textSecondary),
+                                        icon: const Icon(
+                                          Icons.close,
+                                          size: 18,
+                                          color: AppColors.textSecondary,
+                                        ),
                                         onPressed: () => setState(() {
                                           _query = '';
                                           _searchController.clear();
@@ -278,17 +307,29 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(_listTitle,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                Text(
+                                  _listTitle,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 3,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: _listBadgeColor,
                                     borderRadius: BorderRadius.circular(999),
                                   ),
                                   child: Text(
                                     claims.length.toString(),
-                                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -297,7 +338,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             if (claims.isEmpty)
                               Container(
                                 width: double.infinity,
-                                padding: const EdgeInsets.symmetric(vertical: 32),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 32,
+                                ),
                                 decoration: BoxDecoration(
                                   color: AppColors.bgCard,
                                   borderRadius: BorderRadius.circular(12),
@@ -305,7 +348,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 child: const Center(
                                   child: Text(
                                     'No preinspections match your search.',
-                                    style: TextStyle(color: AppColors.textSecondary),
+                                    style: TextStyle(
+                                      color: AppColors.textSecondary,
+                                    ),
                                   ),
                                 ),
                               )
@@ -317,7 +362,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   registrationNumber: claim.registrationNumber,
                                   insuredName: claim.insuredName,
                                   status: claim.status,
-                                  onViewDetails: () => context.go(AppRoutes.claimStart),
+                                  onViewDetails: () =>
+                                      context.go(AppRoutes.claimStart),
                                 ),
                               ),
                           ],
@@ -366,7 +412,9 @@ class _StatCard extends StatelessWidget {
           gradient: gradient,
           color: color,
           borderRadius: BorderRadius.circular(16),
-          border: selected ? Border.all(color: AppColors.primary, width: 2) : null,
+          border: selected
+              ? Border.all(color: AppColors.primary, width: 2)
+              : null,
         ),
         child: Row(
           children: [
@@ -389,11 +437,23 @@ class _StatCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (count.isNotEmpty)
-                    Text(count,
-                        style: TextStyle(color: textColor, fontSize: 19, fontWeight: FontWeight.bold, height: 1.1)),
+                    Text(
+                      count,
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                        height: 1.1,
+                      ),
+                    ),
                   Text(
                     label,
-                    style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.w600, height: 1.2),
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),

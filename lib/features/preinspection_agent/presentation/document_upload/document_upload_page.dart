@@ -38,8 +38,9 @@ class _DocType {
   final bool frontBack;
   final bool isOther;
 
-  DocPickerMode get mode =>
-      isOther ? DocPickerMode.other : (frontBack ? DocPickerMode.frontBack : DocPickerMode.multiple);
+  DocPickerMode get mode => isOther
+      ? DocPickerMode.other
+      : (frontBack ? DocPickerMode.frontBack : DocPickerMode.multiple);
 }
 
 // Preinspection document checklist (port of the PreinspectionAgent
@@ -48,34 +49,62 @@ class _DocType {
 // previous policy copy and PUC.
 const _docList = [
   _DocType(
-    'policy_copy', 'Previous policy copy', 'Insurance Claim Application Form',
-    Icons.description_outlined, Color(0x408A64FF), Color(0xFF8A64FF),
+    'policy_copy',
+    'Previous policy copy',
+    'Insurance Claim Application Form',
+    Icons.description_outlined,
+    Color(0x408A64FF),
+    Color(0xFF8A64FF),
     required: true,
   ),
   _DocType(
-    'puc', 'PUC', 'DL Of Driver At the time of accident',
-    Icons.receipt_long_outlined, Color(0x40DB6F37), Color(0xFFDB6F37),
+    'puc',
+    'PUC',
+    'DL Of Driver At the time of accident',
+    Icons.receipt_long_outlined,
+    Color(0x40DB6F37),
+    Color(0xFFDB6F37),
     required: true,
   ),
   _DocType(
-    'rc', 'Registration Certificate', 'Registration Certificate of insured vehicle',
-    Icons.directions_car_outlined, Color(0x40009348), Color(0xFF009348),
-    required: true, frontBack: true,
+    'rc',
+    'Registration Certificate',
+    'Registration Certificate of insured vehicle',
+    Icons.directions_car_outlined,
+    Color(0x40009348),
+    Color(0xFF009348),
+    required: true,
+    frontBack: true,
   ),
   _DocType(
-    'aadhar', 'Aadhar Card', 'Aadhar of the insured Person',
-    Icons.perm_identity, Color(0x401FA0D9), Color(0xFF1FA0D9),
-    required: true, frontBack: true,
+    'aadhar',
+    'Aadhar Card',
+    'Aadhar of the insured Person',
+    Icons.perm_identity,
+    Color(0x401FA0D9),
+    Color(0xFF1FA0D9),
+    required: true,
+    frontBack: true,
   ),
   _DocType(
-    'pan', 'Pan Card', 'Pan of the insured person',
-    Icons.perm_identity, Color(0x401FA0D9), Color(0xFF1FA0D9),
-    required: true, frontBack: true,
+    'pan',
+    'Pan Card',
+    'Pan of the insured person',
+    Icons.perm_identity,
+    Color(0x401FA0D9),
+    Color(0xFF1FA0D9),
+    required: true,
+    frontBack: true,
   ),
   _DocType(
-    'others', 'Others', 'PUC, Fitness,Police papers & any other documents required in support of claim',
-    Icons.phone_outlined, Color(0x4001A0FE), Color(0xFF01A0FE),
-    required: true, isOther: true,
+    'others',
+    'Others',
+    'PUC, Fitness,Police papers & any other documents required in support of claim',
+    Icons.phone_outlined,
+    Color(0x4001A0FE),
+    Color(0xFF01A0FE),
+    required: true,
+    isOther: true,
   ),
 ];
 
@@ -95,7 +124,8 @@ class DocumentUploadPage extends ConsumerStatefulWidget {
 
 class _DocumentUploadPageState extends ConsumerState<DocumentUploadPage> {
   final _mediaStorage = MediaStorageService();
-  final Map<String, List<(String, String)>> _otherDocuments = {}; // docId -> [(name, path)]
+  final Map<String, List<(String, String)>> _otherDocuments =
+      {}; // docId -> [(name, path)]
 
   Future<void> _openPicker(_DocType doc, ImageSource source) async {
     if (!mounted) return;
@@ -106,14 +136,19 @@ class _DocumentUploadPageState extends ConsumerState<DocumentUploadPage> {
       source: source,
       onSaveSides: (sides) async {
         for (final entry in sides.entries) {
-          final saved = await _mediaStorage.savePhoto('${doc.id}_${entry.key}', entry.value);
+          final saved = await _mediaStorage.savePhoto(
+            '${doc.id}_${entry.key}',
+            entry.value,
+          );
           ref.read(claimFlowProvider.notifier).addDocumentUpload(doc.id, saved);
         }
       },
       onSaveMulti: (name, paths) async {
         final saved = <String>[];
         for (final p in paths) {
-          saved.add(await _mediaStorage.savePhoto('${doc.id}_${saved.length}', p));
+          saved.add(
+            await _mediaStorage.savePhoto('${doc.id}_${saved.length}', p),
+          );
         }
         for (final s in saved) {
           ref.read(claimFlowProvider.notifier).addDocumentUpload(doc.id, s);
@@ -159,7 +194,9 @@ class _DocumentUploadPageState extends ConsumerState<DocumentUploadPage> {
                       value: totalCount == 0 ? 0 : completedCount / totalCount,
                       minHeight: 6,
                       backgroundColor: const Color(0xFFE2E8F0),
-                      valueColor: const AlwaysStoppedAnimation(AppColors.primary),
+                      valueColor: const AlwaysStoppedAnimation(
+                        AppColors.primary,
+                      ),
                     ),
                   ),
                 ),
@@ -179,13 +216,14 @@ class _DocumentUploadPageState extends ConsumerState<DocumentUploadPage> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
               children: [
-                for (final doc in _docList) _DocCard(
-                  doc: doc,
-                  uploaded: isUploaded(doc),
-                  otherDocuments: _otherDocuments[doc.id] ?? const [],
-                  onCamera: () => _openPicker(doc, ImageSource.camera),
-                  onGallery: () => _openPicker(doc, ImageSource.gallery),
-                ),
+                for (final doc in _docList)
+                  _DocCard(
+                    doc: doc,
+                    uploaded: isUploaded(doc),
+                    otherDocuments: _otherDocuments[doc.id] ?? const [],
+                    onCamera: () => _openPicker(doc, ImageSource.camera),
+                    onGallery: () => _openPicker(doc, ImageSource.gallery),
+                  ),
                 const SizedBox(height: 4),
                 BottomButton(
                   label: 'Next',
@@ -248,15 +286,22 @@ class _DocCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Flexible(
-                      child: Text(doc.label,
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                          overflow: TextOverflow.ellipsis),
+                      child: Text(
+                        doc.label,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                     const SizedBox(width: 6),
                     Icon(
                       uploaded ? Icons.check_circle : Icons.hourglass_empty,
                       size: 16,
-                      color: uploaded ? AppColors.statusCompleted : AppColors.statusPending,
+                      color: uploaded
+                          ? AppColors.statusCompleted
+                          : AppColors.statusPending,
                     ),
                     if (doc.required)
                       const Padding(
@@ -276,10 +321,14 @@ class _DocCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: uploaded ? const Color(0x3322C55E) : const Color(0x33EF4444),
+                  color: uploaded
+                      ? const Color(0x3322C55E)
+                      : const Color(0x33EF4444),
                   borderRadius: BorderRadius.circular(999),
                   border: Border.all(
-                    color: uploaded ? AppColors.statusCompleted : AppColors.statusPending,
+                    color: uploaded
+                        ? AppColors.statusCompleted
+                        : AppColors.statusPending,
                   ),
                 ),
                 child: Text(
@@ -287,7 +336,9 @@ class _DocCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: uploaded ? AppColors.textGreen : AppColors.statusPending,
+                    color: uploaded
+                        ? AppColors.textGreen
+                        : AppColors.statusPending,
                   ),
                 ),
               ),
@@ -295,7 +346,13 @@ class _DocCard extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.only(left: 28, top: 1, bottom: 8),
-            child: Text(doc.desc, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            child: Text(
+              doc.desc,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
           ),
           if (doc.isOther && otherDocuments.isNotEmpty)
             Padding(
@@ -306,9 +363,22 @@ class _DocCard extends StatelessWidget {
                   for (final entry in otherDocuments)
                     Row(
                       children: [
-                        Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle)),
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
                         const SizedBox(width: 8),
-                        Text(entry.$1, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                        Text(
+                          entry.$1,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ],
                     ),
                 ],
@@ -316,9 +386,21 @@ class _DocCard extends StatelessWidget {
             ),
           Row(
             children: [
-              Expanded(child: PrimaryButton(label: 'Camera', onPressed: onCamera, height: 34)),
+              Expanded(
+                child: PrimaryButton(
+                  label: 'Camera',
+                  onPressed: onCamera,
+                  height: 34,
+                ),
+              ),
               const SizedBox(width: 10),
-              Expanded(child: SecondaryButton(label: 'Gallery', onPressed: onGallery, height: 34)),
+              Expanded(
+                child: SecondaryButton(
+                  label: 'Gallery',
+                  onPressed: onGallery,
+                  height: 34,
+                ),
+              ),
             ],
           ),
         ],
