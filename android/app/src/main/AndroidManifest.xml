@@ -6,6 +6,10 @@
          these, the consuming app has to declare them itself. -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Talks to the backend (admin-service): login, pre-inspections, photo /
+         video uploads. Debug builds get this automatically; release builds
+         need it declared here or every request fails. -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:label="IBima Preinspection"

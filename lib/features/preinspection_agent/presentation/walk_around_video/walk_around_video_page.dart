@@ -181,7 +181,13 @@ class _WalkAroundVideoPageState extends ConsumerState<WalkAroundVideoPage> {
     final path = _recordedPath;
     if (path == null) return;
     final savedPath = await _mediaStorage.saveVideo('walk_around_video', path);
-    ref.read(claimFlowProvider.notifier).setWalkAroundVideo(savedPath);
+    ref
+        .read(claimFlowProvider.notifier)
+        .setWalkAroundVideo(
+          savedPath,
+          latitude: _position?.latitude,
+          longitude: _position?.longitude,
+        );
     if (mounted) context.pop(true);
   }
 

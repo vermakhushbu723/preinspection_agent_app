@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_routes.dart';
+import '../../../../core/services/api_client.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/orientation.dart';
 import '../../data/vehicle_assets.dart';
@@ -114,14 +115,24 @@ class _PhotoCaptureSelectionPageState
     await AppOrientation.lockLandscape();
   }
 
-  Future<void> _next(WorkflowOption option) async {
-    await ref.read(claimFlowProvider.notifier).setWorkflowOption(option);
+  Future<void> _next() async {
+    // The preinspection flow continues to Add Others Photos -> Vehicle
+    // Information (declarations + signatures), i.e. the "others" branch;
+    // recorded on the server with the survey.
+    try {
+      await ref
+          .read(claimFlowProvider.notifier)
+          .setWorkflowOption(WorkflowOption.group2);
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+      return;
+    }
     if (!mounted) return;
-    context.go(
-      // Both workflow options continue to Add Others Photos in the
-      // preinspection flow (there is no separate damage-photo step here).
-      AppRoutes.addOthersPhotos,
-    );
+    context.go(AppRoutes.addOthersPhotos);
   }
 
   @override
@@ -163,9 +174,7 @@ class _PhotoCaptureSelectionPageState
             _ExtrasStrip(
               flow: flow,
               onTapShot: (id) => id == 'video' ? _openVideo() : _openCamera(id),
-              onNext: allDone
-                  ? () => _next(flow.workflowOption ?? WorkflowOption.group1)
-                  : null,
+              onNext: allDone ? _next : null,
             ),
           ],
         ),

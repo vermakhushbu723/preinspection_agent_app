@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
-
 import 'package:preinspection_agent_app/core/widgets/document_picker_modal.dart';
 import 'package:preinspection_agent_app/features/preinspection_agent/presentation/document_upload/document_upload_page.dart';
 import 'package:preinspection_agent_app/features/preinspection_agent/state/claim_flow_provider.dart';
+import 'package:preinspection_agent_app/features/preinspection_agent/data/preinspection_api.dart';
+
+import '../support/fake_api.dart';
 
 Widget _wrap(Widget child) => ProviderScope(child: MaterialApp(home: child));
 
@@ -39,11 +41,19 @@ void main() {
       tester,
     ) async {
       _useTallSurface(tester);
-      final container = ProviderContainer();
+      final container = ProviderContainer(
+        overrides: [
+          preinspectionApiProvider.overrideWithValue(FakePreinspectionApi()),
+        ],
+      );
       addTearDown(container.dispose);
       container
           .read(claimFlowProvider.notifier)
-          .addDocumentUpload('policy_copy', '/tmp/policy_copy_front.jpg');
+          .addDocumentUpload(
+            'policy_copy',
+            '/tmp/policy_copy_front.jpg',
+            slot: 'policy_copy_0',
+          );
 
       await tester.pumpWidget(
         UncontrolledProviderScope(

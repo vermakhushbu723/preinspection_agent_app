@@ -85,6 +85,9 @@ class _ReinspectionPhotosPageState
     if (file == null) return;
     final saved = await _mediaStorage.savePhoto('reinspection_main', file.path);
     setState(() => _mainPhotoPath = saved);
+    ref
+        .read(claimFlowProvider.notifier)
+        .uploadAfterSurvey('reinspection', 'main', saved);
   }
 
   Future<void> _addExtraPhoto() async {
@@ -105,6 +108,7 @@ class _ReinspectionPhotosPageState
     if (file == null) return;
     final saved = await _mediaStorage.savePhoto('repair_bill', file.path);
     setState(() => _billPath = saved);
+    ref.read(claimFlowProvider.notifier).setRepairBillPath(saved);
   }
 
   void _submit() {

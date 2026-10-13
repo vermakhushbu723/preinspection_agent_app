@@ -8,10 +8,12 @@ import '../../state/claim_flow_provider.dart';
 
 /// Port of `SubmittedPage.jsx`.
 ///
-/// Two faces, decided by whether this survey had already been submitted:
-///  * first submit -- just the SUBMITTED confirmation;
-///  * reopening an already-submitted case -- the confirmation plus the
-///    prompt to add repair & reinspection photos, with a Continue button.
+/// Two faces, decided by the case on the server:
+///  * just submitted -- the SUBMITTED confirmation and a way back to the
+///    dashboard;
+///  * a submitted case reopened from the dashboard that needs repair
+///    (not recommended / rejected / damage survey) -- the prompt to add
+///    repair & reinspection photos, with a Continue button.
 class SubmittedPage extends ConsumerStatefulWidget {
   const SubmittedPage({super.key});
 
@@ -20,25 +22,14 @@ class SubmittedPage extends ConsumerStatefulWidget {
 }
 
 class _SubmittedPageState extends ConsumerState<SubmittedPage> {
-  /// null while the persisted flag is still being read.
-  bool? _alreadySubmitted;
-
-  @override
-  void initState() {
-    super.initState();
-    _resolve();
-  }
-
-  Future<void> _resolve() async {
-    final already = await ref
-        .read(claimFlowProvider.notifier)
-        .markSurveySubmitted();
-    if (mounted) setState(() => _alreadySubmitted = already);
+  Future<void> _toDashboard() async {
+    await ref.read(claimFlowProvider.notifier).resetSession();
+    if (mounted) context.go(AppRoutes.dashboard);
   }
 
   @override
   Widget build(BuildContext context) {
-    final already = _alreadySubmitted;
+    final already = ref.watch(claimFlowProvider).reopenedSubmitted;
 
     return Scaffold(
       body: Container(
@@ -88,7 +79,7 @@ class _SubmittedPageState extends ConsumerState<SubmittedPage> {
                   letterSpacing: 1,
                 ),
               ),
-              if (already == true) ...[
+              if (already) ...[
                 const SizedBox(height: 16),
                 const Text(
                   'This survey Already has\nDo you want to submit\nduring repair & reinspection\nPhotos & Repair bills',
@@ -118,6 +109,30 @@ class _SubmittedPageState extends ConsumerState<SubmittedPage> {
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.3,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              if (!already) ...[
+                const SizedBox(height: 28),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _toDashboard,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.btnPrimary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      'Back to Dashboard',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),

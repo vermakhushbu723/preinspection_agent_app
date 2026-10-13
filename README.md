@@ -12,8 +12,38 @@ the web URLs so the two apps stay easy to compare.
 ```bash
 flutter pub get
 flutter run          # device / emulator (camera + location need a real device)
-flutter test         # 44 tests: routes, login/session, market value, photo-guide layout, signature pad, doc upload
+flutter test         # routes, login/session, server sync (fake API), market value, photo-guide layout, signature pad, doc upload
 flutter analyze
+```
+
+## Backend
+
+The app talks to **admin-service** (`ai-damage-assessment-service/admin-service`, API
+`/api/v1/field/...`), the same backend as the IBima Assist **Admin panel** -- so every
+pre-inspection an agent submits shows up there under **Pre-Inspections**, with its photos
+(GPS + time), walk-around video, documents, declarations and signatures, for Approve / Reject.
+
+- **Logins** are created in Admin panel > Create Users: role *Pre-Inspection Agent*
+  (tab Agent) or *Pre-Inspection Surveyor* / *Internal* / *External Surveyor* (tab Surveyor),
+  platform *Mobile* or *Both*, status *Active*. User ID (or email) + the temp password.
+- **Cases**: the admin assigns them (Pre-Inspections > Assign Pre-Inspection); they appear
+  as Pending on that user's dashboard, the owner form opens prefilled.
+- **Files** are saved on the phone and uploaded in the background as they are captured;
+  Submit first finishes / retries every upload.
+- **Repair & reinspection** photos + bill can follow when the vehicle was marked not
+  recommended or the admin rejected it (dashboard -> case -> Continue).
+
+Server address: `https://admin.ibimaassist.online/api/v1` by default; another one per build:
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8040/api/v1   # local backend from the Android emulator
+```
+
+Contract test against a running backend (local / throwaway DB only -- it creates a user):
+
+```bash
+flutter test test/integration/api_contract_test.dart \
+  --dart-define=CONTRACT_API=http://127.0.0.1:8040/api/v1 --dart-define=CONTRACT_ADMIN_PASSWORD=...
 ```
 
 ## Routes

@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/routing/app_back.dart';
 import '../../../../core/routing/app_routes.dart';
+import '../../../../core/services/api_client.dart';
 import '../../../../core/services/media_storage_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_header.dart';
@@ -75,6 +76,9 @@ class _RepairSubmissionPageState extends ConsumerState<RepairSubmissionPage> {
       file.path,
     );
     setState(() => _reinspectionPhotoPath = saved);
+    ref
+        .read(claimFlowProvider.notifier)
+        .uploadAfterSurvey('reinspection', 'repair-photo', saved);
   }
 
   Future<void> _addExtraPhoto() async {
@@ -88,6 +92,13 @@ class _RepairSubmissionPageState extends ConsumerState<RepairSubmissionPage> {
       file.path,
     );
     setState(() => _extraPhotos.add(saved));
+    ref
+        .read(claimFlowProvider.notifier)
+        .uploadAfterSurvey(
+          'reinspection',
+          'repair-extra-${_extraPhotos.length}',
+          saved,
+        );
   }
 
   Future<void> _pickBill(ImageSource source) async {
@@ -95,14 +106,33 @@ class _RepairSubmissionPageState extends ConsumerState<RepairSubmissionPage> {
     if (file == null) return;
     final saved = await _mediaStorage.savePhoto('repair_bill', file.path);
     setState(() => _billPath = saved);
+    ref.read(claimFlowProvider.notifier).setRepairBillPath(saved);
   }
 
+  /// Uploads whatever is still pending and submits the repair & reinspection
+  /// photos + bill; the case goes back to the admin for review.
   Future<void> _submit() async {
+    if (_submitting) return;
     setState(() => _submitting = true);
-    await Future.delayed(const Duration(milliseconds: 1400));
-    await ref.read(claimFlowProvider.notifier).resetSession();
-    await _mediaStorage.clearSession();
-    if (mounted) context.go(AppRoutes.dashboard);
+    final notifier = ref.read(claimFlowProvider.notifier);
+    try {
+      await notifier.submitRepair();
+      await notifier.resetSession();
+      await _mediaStorage.clearSession();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Repair & reinspection photos submitted')),
+      );
+      context.go(AppRoutes.dashboard);
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
   }
 
   @override

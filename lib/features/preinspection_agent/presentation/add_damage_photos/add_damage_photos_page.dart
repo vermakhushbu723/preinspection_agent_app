@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_back.dart';
 import '../../../../core/routing/app_routes.dart';
+import '../../../../core/services/api_client.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/orientation.dart';
 import '../../../../core/widgets/app_header.dart';
@@ -103,8 +104,16 @@ class _AddDamagePhotosPageState extends ConsumerState<AddDamagePhotosPage> {
 
   Future<void> _submit() async {
     final notifier = ref.read(claimFlowProvider.notifier);
-    if (ref.read(claimFlowProvider).workflowOption == null) {
+    try {
+      // Damage-photo branch, recorded on the server with the survey.
       await notifier.setWorkflowOption(WorkflowOption.group1);
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+      return;
     }
     if (mounted) context.go(AppRoutes.damageReview);
   }

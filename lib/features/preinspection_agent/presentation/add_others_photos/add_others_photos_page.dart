@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_back.dart';
 import '../../../../core/routing/app_routes.dart';
+import '../../../../core/services/api_client.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/orientation.dart';
 import '../../../../core/widgets/app_header.dart';
@@ -92,9 +93,18 @@ class _AddOthersPhotosPageState extends ConsumerState<AddOthersPhotosPage> {
   }
 
   Future<void> _next() async {
-    await ref
-        .read(claimFlowProvider.notifier)
-        .setWorkflowOption(WorkflowOption.group2);
+    try {
+      await ref
+          .read(claimFlowProvider.notifier)
+          .setWorkflowOption(WorkflowOption.group2);
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+      return;
+    }
     if (mounted) context.go(AppRoutes.vehicleInformation);
   }
 

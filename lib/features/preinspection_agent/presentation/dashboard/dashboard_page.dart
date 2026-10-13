@@ -3,16 +3,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_routes.dart';
+import '../../../../core/services/api_client.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_header.dart';
+import '../../../../core/widgets/claim_detail_modal.dart';
 import '../../../../core/widgets/claim_list_card.dart';
-import '../../data/demo_claims.dart';
+import '../../data/preinspection_api.dart';
 import '../../domain/models/claim.dart';
+import '../../state/claim_flow_provider.dart';
 import '../../state/session_provider.dart';
 
 enum _DashboardView { total, completed, pending, search }
 
-/// Port of `DashboardPage.jsx`.
+/// Port of `DashboardPage.jsx`. The list is the signed-in user's
+/// pre-inspections from the server (`GET /field/inspections`): cases assigned
+/// in the Admin panel and the ones they started.
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
 
@@ -25,22 +30,85 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   final _searchController = TextEditingController();
   String _query = '';
 
-  int get _totalCount => demoClaims.length;
+  List<Claim> _claims = const [];
+  bool _loading = true;
+  bool _opening = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final list = await ref.read(preinspectionApiProvider).listInspections();
+      if (mounted) setState(() => _claims = list);
+    } on ApiException catch (e) {
+      if (mounted) setState(() => _error = e.message);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  /// Pending -> continue the survey; a submitted damage survey -> repair &
+  /// reinspection photos; anything else -> its details.
+  Future<void> _open(Claim claim) async {
+    if (claim.status == 'Completed' && !claim.canSubmitRepair) {
+      await ClaimDetailModal.show(
+        context,
+        insurerName: claim.insurerName,
+        claimNumber: claim.claimNumber,
+        registrationNumber: claim.registrationNumber,
+        insuredName: claim.insuredName,
+        vehicle: claim.vehicle,
+        surveyDate: claim.surveyDate,
+        location: claim.location,
+        amount: claim.amount,
+        status: claim.inspectionStatus == 'Submitted'
+            ? 'Under review'
+            : claim.inspectionStatus,
+      );
+      return;
+    }
+    setState(() => _opening = true);
+    try {
+      await ref.read(claimFlowProvider.notifier).openInspection(claim);
+      if (!mounted) return;
+      context.go(
+        claim.canSubmitRepair ? AppRoutes.submitted : AppRoutes.claimStart,
+      );
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } finally {
+      if (mounted) setState(() => _opening = false);
+    }
+  }
+
+  int get _totalCount => _claims.length;
   int get _completedCount =>
-      demoClaims.where((c) => c.status == 'Completed').length;
-  int get _pendingCount =>
-      demoClaims.where((c) => c.status == 'Pending').length;
+      _claims.where((c) => c.status == 'Completed').length;
+  int get _pendingCount => _claims.where((c) => c.status == 'Pending').length;
 
   List<Claim> get _filteredClaims {
     switch (_view) {
       case _DashboardView.completed:
-        return demoClaims.where((c) => c.status == 'Completed').toList();
+        return _claims.where((c) => c.status == 'Completed').toList();
       case _DashboardView.pending:
-        return demoClaims.where((c) => c.status == 'Pending').toList();
+        return _claims.where((c) => c.status == 'Pending').toList();
       case _DashboardView.search:
         final q = _query.trim().toLowerCase();
-        if (q.isEmpty) return demoClaims;
-        return demoClaims.where((c) {
+        if (q.isEmpty) return _claims;
+        return _claims.where((c) {
           return [
             c.claimNumber,
             c.registrationNumber,
@@ -51,7 +119,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ].any((f) => f.toLowerCase().contains(q));
         }).toList();
       case _DashboardView.total:
-        return demoClaims;
+        return _claims;
     }
   }
 
@@ -187,186 +255,234 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         ),
                       ),
                       padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            GridView(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              padding: EdgeInsets.zero,
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    mainAxisSpacing: 10,
-                                    crossAxisSpacing: 10,
-                                    // Fixed height, not an aspect ratio: the label
-                                    // can wrap to two lines and must still fit
-                                    // inside the card on any screen width.
-                                    mainAxisExtent: 88,
-                                  ),
-                              children: [
-                                _StatCard(
-                                  icon: Icons.description_outlined,
-                                  count: _totalCount.toString().padLeft(2, '0'),
-                                  label: 'Total Preinspection',
-                                  gradient: AppColors.cardTotalClaims,
-                                  textColor: Colors.white,
-                                  selected: _view == _DashboardView.total,
-                                  onTap: () =>
-                                      _selectView(_DashboardView.total),
-                                ),
-                                _StatCard(
-                                  icon: Icons.task_alt,
-                                  count: _completedCount.toString().padLeft(
-                                    2,
-                                    '0',
-                                  ),
-                                  label: 'Completed',
-                                  gradient: AppColors.cardSurveyCompleted,
-                                  textColor: const Color(0xFF009348),
-                                  selected: _view == _DashboardView.completed,
-                                  onTap: () =>
-                                      _selectView(_DashboardView.completed),
-                                ),
-                                _StatCard(
-                                  icon: Icons.pending_actions,
-                                  count: _pendingCount.toString().padLeft(
-                                    2,
-                                    '0',
-                                  ),
-                                  label: 'Pending',
-                                  color: AppColors.cardPendingSurvey,
-                                  textColor: Colors.white,
-                                  selected: _view == _DashboardView.pending,
-                                  onTap: () =>
-                                      _selectView(_DashboardView.pending),
-                                ),
-                                _StatCard(
-                                  icon: Icons.search,
-                                  count: '',
-                                  label: 'Search',
-                                  gradient: AppColors.cardSearchClaim,
-                                  textColor: Colors.white,
-                                  selected: _view == _DashboardView.search,
-                                  onTap: () =>
-                                      _selectView(_DashboardView.search),
-                                ),
-                              ],
-                            ),
-                            if (_view == _DashboardView.search) ...[
-                              const SizedBox(height: 12),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.bgInput,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: AppColors.borderInput,
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.search,
-                                      size: 18,
-                                      color: AppColors.textSecondary,
+                      // Pull down to fetch the latest list (e.g. a newly assigned case).
+                      child: RefreshIndicator(
+                        onRefresh: _load,
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              GridView(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                padding: EdgeInsets.zero,
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2,
+                                      mainAxisSpacing: 10,
+                                      crossAxisSpacing: 10,
+                                      // Fixed height, not an aspect ratio: the label
+                                      // can wrap to two lines and must still fit
+                                      // inside the card on any screen width.
+                                      mainAxisExtent: 88,
                                     ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: TextField(
-                                        controller: _searchController,
-                                        onChanged: (v) =>
-                                            setState(() => _query = v),
-                                        decoration: const InputDecoration(
-                                          hintText:
-                                              'Search PI ref. number, reg. no., name…',
-                                          border: InputBorder.none,
-                                        ),
-                                      ),
+                                children: [
+                                  _StatCard(
+                                    icon: Icons.description_outlined,
+                                    count: _totalCount.toString().padLeft(
+                                      2,
+                                      '0',
                                     ),
-                                    if (_query.isNotEmpty)
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.close,
-                                          size: 18,
-                                          color: AppColors.textSecondary,
-                                        ),
-                                        onPressed: () => setState(() {
-                                          _query = '';
-                                          _searchController.clear();
-                                        }),
-                                      ),
-                                  ],
-                                ),
+                                    label: 'Total Preinspection',
+                                    gradient: AppColors.cardTotalClaims,
+                                    textColor: Colors.white,
+                                    selected: _view == _DashboardView.total,
+                                    onTap: () =>
+                                        _selectView(_DashboardView.total),
+                                  ),
+                                  _StatCard(
+                                    icon: Icons.task_alt,
+                                    count: _completedCount.toString().padLeft(
+                                      2,
+                                      '0',
+                                    ),
+                                    label: 'Completed',
+                                    gradient: AppColors.cardSurveyCompleted,
+                                    textColor: const Color(0xFF009348),
+                                    selected: _view == _DashboardView.completed,
+                                    onTap: () =>
+                                        _selectView(_DashboardView.completed),
+                                  ),
+                                  _StatCard(
+                                    icon: Icons.pending_actions,
+                                    count: _pendingCount.toString().padLeft(
+                                      2,
+                                      '0',
+                                    ),
+                                    label: 'Pending',
+                                    color: AppColors.cardPendingSurvey,
+                                    textColor: Colors.white,
+                                    selected: _view == _DashboardView.pending,
+                                    onTap: () =>
+                                        _selectView(_DashboardView.pending),
+                                  ),
+                                  _StatCard(
+                                    icon: Icons.search,
+                                    count: '',
+                                    label: 'Search',
+                                    gradient: AppColors.cardSearchClaim,
+                                    textColor: Colors.white,
+                                    selected: _view == _DashboardView.search,
+                                    onTap: () =>
+                                        _selectView(_DashboardView.search),
+                                  ),
+                                ],
                               ),
-                            ],
-                            const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  _listTitle,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                  ),
-                                ),
+                              if (_view == _DashboardView.search) ...[
+                                const SizedBox(height: 12),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 3,
+                                    horizontal: 12,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: _listBadgeColor,
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                  child: Text(
-                                    claims.length.toString(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
+                                    color: AppColors.bgInput,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: AppColors.borderInput,
                                     ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.search,
+                                        size: 18,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: TextField(
+                                          controller: _searchController,
+                                          onChanged: (v) =>
+                                              setState(() => _query = v),
+                                          decoration: const InputDecoration(
+                                            hintText:
+                                                'Search PI ref. number, reg. no., name…',
+                                            border: InputBorder.none,
+                                          ),
+                                        ),
+                                      ),
+                                      if (_query.isNotEmpty)
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.close,
+                                            size: 18,
+                                            color: AppColors.textSecondary,
+                                          ),
+                                          onPressed: () => setState(() {
+                                            _query = '';
+                                            _searchController.clear();
+                                          }),
+                                        ),
+                                    ],
                                   ),
                                 ),
                               ],
-                            ),
-                            const SizedBox(height: 8),
-                            if (claims.isEmpty)
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 32,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.bgCard,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Center(
-                                  child: Text(
-                                    'No preinspections match your search.',
-                                    style: TextStyle(
-                                      color: AppColors.textSecondary,
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    _listTitle,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
                                     ),
                                   ),
-                                ),
-                              )
-                            else
-                              ...claims.map(
-                                (claim) => ClaimListCard(
-                                  insurerName: claim.insurerName,
-                                  claimNumber: claim.claimNumber,
-                                  registrationNumber: claim.registrationNumber,
-                                  insuredName: claim.insuredName,
-                                  status: claim.status,
-                                  onViewDetails: () =>
-                                      context.go(AppRoutes.claimStart),
-                                ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _listBadgeColor,
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Text(
+                                      claims.length.toString(),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                          ],
+                              const SizedBox(height: 8),
+                              if (_loading)
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 40),
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
+                              else if (_error != null)
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 24,
+                                    horizontal: 16,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.bgCard,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        _error!,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      OutlinedButton(
+                                        onPressed: _load,
+                                        child: const Text('Retry'),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              else if (claims.isEmpty)
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 32,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.bgCard,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      _claims.isEmpty
+                                          ? 'No preinspections assigned to you yet.'
+                                          : 'No preinspections match your search.',
+                                      style: const TextStyle(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              else
+                                ...claims.map(
+                                  (claim) => ClaimListCard(
+                                    insurerName: claim.insurerName,
+                                    claimNumber: claim.claimNumber,
+                                    registrationNumber:
+                                        claim.registrationNumber,
+                                    insuredName: claim.insuredName,
+                                    status: claim.status,
+                                    onViewDetails: () {
+                                      if (!_opening) _open(claim);
+                                    },
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

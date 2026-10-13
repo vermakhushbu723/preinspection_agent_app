@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_routes.dart';
+import '../../../../core/services/api_client.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bottom_button.dart';
 import '../../state/session_provider.dart';
@@ -40,6 +41,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   String? _passwordError;
   String? _captchaError;
 
+  /// Reason the server refused the login (wrong password, locked, wrong tab...).
+  String? _serverError;
+  bool _loading = false;
+
   @override
   void initState() {
     super.initState();
@@ -61,7 +66,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
   }
 
-  void _handleLogin() {
+  Future<void> _handleLogin() async {
+    if (_loading) return;
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
     final captcha = _captchaController.text.trim();
@@ -72,6 +78,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       _captchaError = captcha.isEmpty
           ? 'Captcha is required'
           : (captcha != _captchaText ? 'Captcha does not match' : null);
+      _serverError = null;
     });
 
     if (_usernameError != null ||
@@ -81,12 +88,25 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       return;
     }
 
-    // Remember who signed in -- the dashboard greets this id by name and
-    // says whether it belongs to an agent or a surveyor.
-    ref
-        .read(sessionProvider.notifier)
-        .signIn(userId: username, role: _activeTab);
-    context.go(AppRoutes.dashboard);
+    // Accounts are created in the IBima Assist Admin panel (Create Users,
+    // role Pre-Inspection Agent / Surveyor, platform Mobile); the server
+    // checks the password and that the account belongs on this tab.
+    setState(() => _loading = true);
+    try {
+      await ref
+          .read(sessionProvider.notifier)
+          .signIn(userId: username, password: password, role: _activeTab);
+      if (mounted) context.go(AppRoutes.dashboard);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _serverError = e.message;
+        _passwordController.clear();
+      });
+      _refreshCaptcha();
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override
@@ -204,10 +224,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 onChanged: (_) =>
                                     setState(() => _captchaError = null),
                               ),
+                              if (_serverError != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 12),
+                                  child: Text(
+                                    _serverError!,
+                                    key: const Key('login-error'),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Color(0xFFDC2626),
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
                               const SizedBox(height: 20),
                               BottomButton(
-                                label: 'Login',
-                                onPressed: _handleLogin,
+                                label: _loading ? 'Signing in…' : 'Login',
+                                onPressed: _loading ? null : _handleLogin,
                               ),
                             ],
                           ),

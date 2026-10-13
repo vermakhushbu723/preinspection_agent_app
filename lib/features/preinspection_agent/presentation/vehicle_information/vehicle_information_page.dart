@@ -5,18 +5,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/config/insurer_branding.dart';
 import '../../../../core/routing/app_back.dart';
 import '../../../../core/routing/app_routes.dart';
+import '../../../../core/services/api_client.dart';
+import '../../../../core/services/media_storage_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_header.dart';
 import '../../../../core/widgets/page_title_bar.dart';
 import '../../../../core/widgets/signature_pad.dart';
 import '../../state/claim_flow_provider.dart';
+import '../../state/claim_flow_state.dart';
+import '../../state/session_provider.dart';
 
-/// Vehicle/insured detail values here are the web app's own hardcoded demo
-/// values for this screen (note: they differ from the ones shown on
-/// DamageReviewPage in the web app too — that's the source, not a
-/// transcription error) — kept verbatim for exact parity.
+/// Vehicle / insured rows: the saved owner & vehicle form and the server's
+/// PI Ref. Number (no "Body Type" row -- the form never collects it).
 class _Row {
   const _Row(this.icon, this.color, this.label, this.value);
   final IconData icon;
@@ -25,55 +28,67 @@ class _Row {
   final String value;
 }
 
-const _vehicleDetails = [
-  _Row(Icons.directions_car, Color(0xFF3B82F6), 'Make', 'Volkswagen'),
-  _Row(Icons.adjust, Color(0xFFEF4444), 'Model', 'Polo'),
-  _Row(Icons.palette, Color(0xFFA855F7), 'Variant', 'DSG Automatic'),
-  _Row(Icons.inventory_2_outlined, Color(0xFFF97316), 'Body Type', 'Sedan'),
-  _Row(Icons.build_outlined, Color(0xFF14B8A6), 'Mfg Year', '2017'),
-  _Row(
-    Icons.badge_outlined,
-    Color(0xFF6366F1),
-    'Registration Number',
-    'MH 44 CD 2545',
-  ),
-  _Row(Icons.speed, Color(0xFFEC4899), 'Odometer', 'N/A'),
-  _Row(Icons.map_outlined, Color(0xFF22C55E), 'State', 'MH'),
-  _Row(
-    Icons.calendar_today_outlined,
-    Color(0xFFF59E0B),
-    'Registration Date',
-    '17/10/2017',
-  ),
-];
+List<_Row> _vehicleDetails(ClaimFlowState flow) {
+  final d = flow.ownerVehicleDetails;
+  String v(String x) => x.isEmpty ? '-' : x;
+  return [
+    _Row(Icons.directions_car, const Color(0xFF3B82F6), 'Make', v(d.make)),
+    _Row(Icons.adjust, const Color(0xFFEF4444), 'Model', v(d.model)),
+    _Row(Icons.palette, const Color(0xFFA855F7), 'Variant', v(d.variant)),
+    _Row(
+      Icons.build_outlined,
+      const Color(0xFF14B8A6),
+      'Mfg Year',
+      v(d.manufacturingYear),
+    ),
+    _Row(
+      Icons.badge_outlined,
+      const Color(0xFF6366F1),
+      'Registration Number',
+      v(d.registrationNumber),
+    ),
+    _Row(
+      Icons.speed,
+      const Color(0xFFEC4899),
+      'Odometer',
+      d.odometer.isEmpty ? '-' : '${d.odometer} KM',
+    ),
+    _Row(Icons.map_outlined, const Color(0xFF22C55E), 'State', v(d.state)),
+    _Row(
+      Icons.calendar_today_outlined,
+      const Color(0xFFF59E0B),
+      'Registration Date',
+      v(d.registrationDate),
+    ),
+  ];
+}
 
-const _insuredDetails = [
-  _Row(Icons.person, Color(0xFF0EA5E9), 'Insured Name', 'User Full Name'),
-  _Row(
-    Icons.phone_android,
-    Color(0xFF22C55E),
-    'Mobile Number',
-    '+91 1234567890',
-  ),
-  _Row(
-    Icons.email_outlined,
-    Color(0xFFF59E0B),
-    'Email Address',
-    'useremail@gmail.com',
-  ),
-  _Row(
-    Icons.description_outlined,
-    Color(0xFFA855F7),
-    'PI Ref.Number',
-    '123456789CAR20',
-  ),
-  _Row(
-    Icons.business,
-    Color(0xFFEF4444),
-    'Insurance Co',
-    'XYZ Insurance company ltd',
-  ),
-];
+List<_Row> _insuredDetails(ClaimFlowState flow, String insurer) {
+  final d = flow.ownerVehicleDetails;
+  String v(String x) => x.isEmpty ? '-' : x;
+  return [
+    _Row(Icons.person, const Color(0xFF0EA5E9), 'Insured Name', v(d.ownerName)),
+    _Row(
+      Icons.phone_android,
+      const Color(0xFF22C55E),
+      'Mobile Number',
+      d.mobile.isEmpty ? '-' : '+91 ${d.mobile}',
+    ),
+    _Row(
+      Icons.email_outlined,
+      const Color(0xFFF59E0B),
+      'Email Address',
+      v(d.email),
+    ),
+    _Row(
+      Icons.description_outlined,
+      const Color(0xFFA855F7),
+      'PI Ref.Number',
+      flow.inspectionId ?? '-',
+    ),
+    _Row(Icons.business, const Color(0xFFEF4444), 'Insurance Co', v(insurer)),
+  ];
+}
 
 /// Port of `VehicleInformationPage.jsx` (Group 2 workflow branch terminal
 /// screen before Submitted).
@@ -89,33 +104,71 @@ class _VehicleInformationPageState
     extends ConsumerState<VehicleInformationPage> {
   String? _recommendation; // 'approved' | 'rejected'
 
-  void _submit() {
+  bool _submitting = false;
+
+  void _alert(String text) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        content: Text(text),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Uploads anything still pending, the two signatures, declarations and the
+  /// recommendation, then submits -- it then shows in the Admin panel under
+  /// Pre-Inspections.
+  Future<void> _submit() async {
+    if (_submitting) return;
     final flow = ref.read(claimFlowProvider);
     if (!flow.bothSignaturesPresent) {
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          content: const Text('Please capture both signatures'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
+      _alert('Please capture both signatures');
       return;
     }
-    ref.read(claimFlowProvider.notifier).clearDeclarationsAndSignatures();
-    // Preinspection ends back on the dashboard rather than the claim
-    // flow's Submitted screen.
-    context.go(AppRoutes.dashboard);
+    if (_recommendation == null) {
+      _alert('Please choose whether this preinspection is recommended');
+      return;
+    }
+    setState(() => _submitting = true);
+    final notifier = ref.read(claimFlowProvider.notifier);
+    try {
+      await notifier.submitSurvey(
+        recommendation: _recommendation == 'approved' ? 'Approved' : 'Rejected',
+      );
+      final ref0 = flow.inspectionId;
+      notifier.clearDeclarationsAndSignatures();
+      await notifier.resetSession();
+      await MediaStorageService().clearSession();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Preinspection ${ref0 ?? ''} submitted')),
+      );
+      // Preinspection ends back on the dashboard rather than the claim
+      // flow's Submitted screen.
+      context.go(AppRoutes.dashboard);
+    } on ApiException catch (e) {
+      if (mounted) _alert(e.message);
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final flow = ref.watch(claimFlowProvider);
     final photoPaths = flow.photos.values.toList();
+    final insurer =
+        InsurerBranding.current.name ??
+        ref.watch(sessionProvider)?.user.organization ??
+        '';
+    final vehicleDetails = _vehicleDetails(flow);
+    final insuredDetails = _insuredDetails(flow, insurer);
 
     return Scaffold(
       backgroundColor: AppColors.bgCard,
@@ -186,7 +239,7 @@ class _VehicleInformationPageState
                         ),
                       ),
                       const SizedBox(height: 12),
-                      for (final row in _vehicleDetails)
+                      for (final row in vehicleDetails)
                         _InformationRow(row: row),
                     ],
                   ),
@@ -205,7 +258,7 @@ class _VehicleInformationPageState
                         ),
                       ),
                       const SizedBox(height: 12),
-                      for (final row in _insuredDetails)
+                      for (final row in insuredDetails)
                         _InformationRow(row: row),
                     ],
                   ),
@@ -345,7 +398,7 @@ class _VehicleInformationPageState
                           const SizedBox(width: 10),
                           Expanded(
                             child: ElevatedButton(
-                              onPressed: _submit,
+                              onPressed: _submitting ? null : _submit,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.btnPrimary,
                                 foregroundColor: Colors.white,
@@ -356,9 +409,9 @@ class _VehicleInformationPageState
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Text(
-                                'Submit Survey',
-                                style: TextStyle(
+                              child: Text(
+                                _submitting ? 'Submitting…' : 'Submit Survey',
+                                style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                 ),

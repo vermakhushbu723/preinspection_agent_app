@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/routing/app_back.dart';
 import '../../../../core/routing/app_routes.dart';
+import '../../../../core/services/api_client.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_header.dart';
@@ -91,6 +92,53 @@ class _OwnerVehicleDetailsPageState
   DateTime? _manufacturingYear;
 
   final Map<String, String?> _errors = {};
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _prefill(ref.read(claimFlowProvider).ownerVehicleDetails);
+  }
+
+  /// Fills the form from an assigned case (insured name, mobile, reg. no.)
+  /// or a survey the agent already started. Dropdown values are only taken
+  /// when they exist in the current lists.
+  void _prefill(OwnerVehicleDetails d) {
+    _ownerNameController.text = d.ownerName;
+    _mobileController.text = d.mobile;
+    _emailController.text = d.email;
+    _odometerController.text = d.odometer;
+    _regNoController.text = d.registrationNumber;
+    _idvController.text = d.idv;
+    if (_surveyTypes.contains(d.surveyType)) _surveyType = d.surveyType;
+    if (_indianStates.contains(d.state)) _state = d.state;
+    if (_ownerSerialNumbers.contains(d.ownerSerialNumber)) {
+      _ownerSerialNumber = d.ownerSerialNumber;
+    }
+    if (_products.contains(d.product)) {
+      _product = d.product;
+      if (makesFor(_product).contains(d.make)) {
+        _make = d.make;
+        if (modelsFor(_product, _make).contains(d.model)) {
+          _model = d.model;
+          if (variantsFor(_product, _make, _model).contains(d.variant)) {
+            _variant = d.variant;
+          }
+        }
+      }
+    }
+    _registrationDate = _parseDate(d.registrationDate, 'dd-MM-yyyy');
+    _manufacturingYear = _parseDate(d.manufacturingYear, 'MM-yyyy');
+  }
+
+  DateTime? _parseDate(String value, String pattern) {
+    if (value.isEmpty) return null;
+    try {
+      return DateFormat(pattern).parseStrict(value);
+    } catch (_) {
+      return null;
+    }
+  }
 
   /// Only a valuation survey asks for the vehicle's present market value.
   bool get _isValuation => _surveyType == _valuation;
@@ -204,8 +252,8 @@ class _OwnerVehicleDetailsPageState
     return errors.isEmpty;
   }
 
-  void _submit() {
-    if (!_validate()) return;
+  Future<void> _submit() async {
+    if (_saving || !_validate()) return;
 
     final details = OwnerVehicleDetails(
       surveyType: _surveyType,
@@ -226,8 +274,23 @@ class _OwnerVehicleDetailsPageState
       idv: _isValuation ? _idvController.text.trim() : '',
     );
 
-    ref.read(claimFlowProvider.notifier).setOwnerVehicleDetails(details);
-    context.go(AppRoutes.documentUpload);
+    // Saved on the server: starts the pre-inspection (PI Ref. Number) or
+    // updates the assigned / started one.
+    setState(() => _saving = true);
+    try {
+      await ref
+          .read(claimFlowProvider.notifier)
+          .saveOwnerVehicleDetails(details);
+      if (mounted) context.go(AppRoutes.documentUpload);
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   /// Explains the suggested figure, or what is still needed to work one out.
@@ -428,7 +491,10 @@ class _OwnerVehicleDetailsPageState
                       helper: _marketValueHelper(),
                     ),
                   const SizedBox(height: 8),
-                  BottomButton(label: 'Next', onPressed: _submit),
+                  BottomButton(
+                    label: _saving ? 'Saving…' : 'Next',
+                    onPressed: _saving ? null : _submit,
+                  ),
                 ],
               ),
             ),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:preinspection_agent_app/core/routing/app_router.dart';
 import 'package:preinspection_agent_app/core/routing/app_routes.dart';
+import 'package:preinspection_agent_app/features/preinspection_agent/data/preinspection_api.dart';
+
+import '../support/fake_api.dart';
 
 const _staticRoutes = [
   AppRoutes.login,
@@ -34,7 +36,12 @@ void main() {
     // `pumpWidget` in the same test file corrupts the element tree.
     final router = createAppRouter();
     await tester.pumpWidget(
-      ProviderScope(child: MaterialApp.router(routerConfig: router)),
+      ProviderScope(
+        overrides: [
+          preinspectionApiProvider.overrideWithValue(FakePreinspectionApi()),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -58,7 +65,12 @@ void main() {
   ) async {
     final router = createAppRouter();
     await tester.pumpWidget(
-      ProviderScope(child: MaterialApp.router(routerConfig: router)),
+      ProviderScope(
+        overrides: [
+          preinspectionApiProvider.overrideWithValue(FakePreinspectionApi()),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
     );
     await tester.pumpAndSettle();
 

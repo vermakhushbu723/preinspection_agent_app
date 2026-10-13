@@ -46,6 +46,31 @@ class OwnerVehicleDetails {
 
   VehicleCategory get vehicleCategory => categoryForProduct(product);
 
+  /// From the server's inspection `details` -- an assigned case only has the
+  /// insured name, mobile and registration number filled in.
+  factory OwnerVehicleDetails.fromJson(Map<String, dynamic> j) {
+    String s(String key) => (j[key] ?? '').toString();
+    return OwnerVehicleDetails(
+      surveyType: j['surveyType'] == 'Valuation'
+          ? 'Valuation'
+          : 'pre inspection',
+      ownerName: s('ownerName'),
+      mobile: s('mobile'),
+      email: s('email'),
+      odometer: s('odometer'),
+      registrationNumber: s('registrationNumber'),
+      state: s('state'),
+      registrationDate: s('registrationDate'),
+      product: s('product'),
+      make: s('make'),
+      model: s('model'),
+      variant: s('variant'),
+      manufacturingYear: s('manufacturingYear'),
+      ownerSerialNumber: s('ownerSerialNumber'),
+      idv: s('idv'),
+    );
+  }
+
   static const empty = OwnerVehicleDetails(
     surveyType: 'pre inspection',
     ownerName: '',

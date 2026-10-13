@@ -4,11 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/config/insurer_branding.dart';
 import '../../../../core/routing/app_back.dart';
 import '../../../../core/routing/app_routes.dart';
+import '../../../../core/services/api_client.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_header.dart';
 import '../../state/claim_flow_provider.dart';
+import '../../state/claim_flow_state.dart';
+import '../../state/session_provider.dart';
 
 const _defaultVehiclePhotos = [
   'assets/images/vehicles/car/RearLeft.png',
@@ -20,13 +24,7 @@ const _defaultVehiclePhotos = [
 ];
 
 class _Row {
-  const _Row(
-    this.icon,
-    this.color,
-    this.label,
-    this.value, {
-    this.muted = false,
-  });
+  const _Row(this.icon, this.color, this.label, this.value) : muted = false;
   final IconData icon;
   final Color color;
   final String label;
@@ -34,72 +32,70 @@ class _Row {
   final bool muted;
 }
 
-/// Vehicle & insured detail values shown here are the web app's own
-/// hardcoded demo values (not wired to the real claim) -- kept verbatim
-/// for exact parity with the reference site.
-const _vehicleDetails = [
-  _Row(Icons.directions_car, Color(0xFF2563EB), 'Make', 'Volkswagen Polo'),
-  _Row(Icons.adjust, Color(0xFFDB2777), 'Model', 'GT Tsi'),
-  _Row(Icons.palette, Color(0xFF7C3AED), 'Variant', 'DSG Automatic'),
-  _Row(
-    Icons.inventory_2_outlined,
-    Color(0xFFEA580C),
-    'Body Type',
-    'Hatch Back',
-    muted: true,
-  ),
-  _Row(Icons.factory_outlined, Color(0xFF0891B2), 'Mfg Year', '2017'),
-  _Row(
-    Icons.badge_outlined,
-    Color(0xFF16A34A),
-    'Registration number',
-    'MH 49 DS 2345',
-  ),
-  _Row(Icons.speed, Color(0xFFDC2626), 'Odometer', '141470 KMS'),
-  _Row(Icons.place_outlined, Color(0xFF0D9488), 'State', 'MH'),
-  _Row(
-    Icons.calendar_today_outlined,
-    Color(0xFF4F46E5),
-    'Registration Date',
-    '17/03/2017',
-  ),
-];
+/// Vehicle & insured rows from the saved owner & vehicle form and the
+/// server's PI Ref. Number (no Body Type / Policy Number rows: the form never
+/// collects them).
+List<_Row> _vehicleDetails(ClaimFlowState flow) {
+  final d = flow.ownerVehicleDetails;
+  String v(String x) => x.isEmpty ? '-' : x;
+  return [
+    _Row(Icons.directions_car, const Color(0xFF2563EB), 'Make', v(d.make)),
+    _Row(Icons.adjust, const Color(0xFFDB2777), 'Model', v(d.model)),
+    _Row(Icons.palette, const Color(0xFF7C3AED), 'Variant', v(d.variant)),
+    _Row(
+      Icons.factory_outlined,
+      const Color(0xFF0891B2),
+      'Mfg Year',
+      v(d.manufacturingYear),
+    ),
+    _Row(
+      Icons.badge_outlined,
+      const Color(0xFF16A34A),
+      'Registration number',
+      v(d.registrationNumber),
+    ),
+    _Row(
+      Icons.speed,
+      const Color(0xFFDC2626),
+      'Odometer',
+      d.odometer.isEmpty ? '-' : '${d.odometer} KMS',
+    ),
+    _Row(Icons.place_outlined, const Color(0xFF0D9488), 'State', v(d.state)),
+    _Row(
+      Icons.calendar_today_outlined,
+      const Color(0xFF4F46E5),
+      'Registration Date',
+      v(d.registrationDate),
+    ),
+  ];
+}
 
-const _insuredDetails = [
-  _Row(Icons.person, Color(0xFF22C55E), 'Insured Name', 'User Full Name'),
-  _Row(
-    Icons.phone_android,
-    Color(0xFFEC4899),
-    'Mobile Number',
-    '+91 1234567890',
-  ),
-  _Row(
-    Icons.email_outlined,
-    Color(0xFFF97316),
-    'Email Address',
-    'Username@gmail.com',
-  ),
-  _Row(
-    Icons.assignment_outlined,
-    Color(0xFF7C3AED),
-    'Claim number',
-    '123456789CAR20',
-    muted: true,
-  ),
-  _Row(
-    Icons.description_outlined,
-    Color(0xFF22C55E),
-    'Policy Number',
-    '123456789CAR20',
-    muted: true,
-  ),
-  _Row(
-    Icons.business,
-    Color(0xFF3B82F6),
-    'Insurance Co',
-    'XYZ insurance comapny ltd',
-  ),
-];
+List<_Row> _insuredDetails(ClaimFlowState flow, String insurer) {
+  final d = flow.ownerVehicleDetails;
+  String v(String x) => x.isEmpty ? '-' : x;
+  return [
+    _Row(Icons.person, const Color(0xFF22C55E), 'Insured Name', v(d.ownerName)),
+    _Row(
+      Icons.phone_android,
+      const Color(0xFFEC4899),
+      'Mobile Number',
+      d.mobile.isEmpty ? '-' : '+91 ${d.mobile}',
+    ),
+    _Row(
+      Icons.email_outlined,
+      const Color(0xFFF97316),
+      'Email Address',
+      v(d.email),
+    ),
+    _Row(
+      Icons.assignment_outlined,
+      const Color(0xFF7C3AED),
+      'PI Ref. Number',
+      flow.inspectionId ?? '-',
+    ),
+    _Row(Icons.business, const Color(0xFF3B82F6), 'Insurance Co', v(insurer)),
+  ];
+}
 
 /// Port of `DamageReviewPage.jsx`.
 class DamageReviewPage extends ConsumerStatefulWidget {
@@ -129,7 +125,25 @@ class _DamageReviewPageState extends ConsumerState<DamageReviewPage> {
     context.go(AppRoutes.inspectionDetails);
   }
 
-  void _submit() => context.go(AppRoutes.submitted);
+  bool _submitting = false;
+
+  /// Uploads anything still pending, then submits the survey on the server.
+  Future<void> _submit() async {
+    if (_submitting) return;
+    setState(() => _submitting = true);
+    try {
+      await ref.read(claimFlowProvider.notifier).submitSurvey();
+      if (mounted) context.go(AppRoutes.submitted);
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -278,9 +292,20 @@ class _DamageReviewPageState extends ConsumerState<DamageReviewPage> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                _DetailCard(title: 'Vehicle Details', rows: _vehicleDetails),
+                _DetailCard(
+                  title: 'Vehicle Details',
+                  rows: _vehicleDetails(flow),
+                ),
                 const SizedBox(height: 8),
-                _DetailCard(title: 'Insured Details', rows: _insuredDetails),
+                _DetailCard(
+                  title: 'Insured Details',
+                  rows: _insuredDetails(
+                    flow,
+                    InsurerBranding.current.name ??
+                        ref.watch(sessionProvider)?.user.organization ??
+                        '',
+                  ),
+                ),
               ],
             ),
           ),
@@ -316,7 +341,7 @@ class _DamageReviewPageState extends ConsumerState<DamageReviewPage> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: _submit,
+                      onPressed: _submitting ? null : _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.btnPrimary,
                         foregroundColor: Colors.white,

@@ -235,7 +235,15 @@ class _CameraCapturePageState extends ConsumerState<CameraCapturePage>
     final path = _capturedPath;
     if (path == null) return;
     final savedPath = await _mediaStorage.savePhoto(widget.angle, path);
-    ref.read(claimFlowProvider.notifier).setPhoto(widget.angle, savedPath);
+    // Uploaded in the background with the GPS fix shown on the overlay.
+    ref
+        .read(claimFlowProvider.notifier)
+        .setPhoto(
+          widget.angle,
+          savedPath,
+          latitude: _position?.latitude,
+          longitude: _position?.longitude,
+        );
     if (mounted) context.pop(true);
   }
 

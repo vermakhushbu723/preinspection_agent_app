@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/insurer_branding.dart';
@@ -11,6 +12,8 @@ import '../../../../core/widgets/bottom_button.dart';
 import '../../../../core/widgets/location_modal.dart';
 import '../../../../core/widgets/page_title_bar.dart';
 import '../../../../core/widgets/rotate_device_modal.dart';
+import '../../state/claim_flow_provider.dart';
+import '../../state/session_provider.dart';
 
 class _InspectionRow {
   const _InspectionRow(this.icon, this.label, this.value, this.iconBg);
@@ -20,38 +23,45 @@ class _InspectionRow {
   final Color iconBg;
 }
 
-final _inspectionData = [
-  _InspectionRow(
-    Icons.business,
-    'Insurance Company',
-    InsurerBranding.current.name ?? '-',
-    const Color(0xFF3B82F6),
-  ),
-  const _InspectionRow(
-    Icons.person,
-    'Insured Name',
-    'Rahul Sharma',
-    Color(0xFF22C55E),
-  ),
-  const _InspectionRow(
-    Icons.directions_car,
-    'Vehicle Number',
-    'MH 01 BS 1234',
-    Color(0xFFEF4444),
-  ),
-  const _InspectionRow(
-    Icons.assignment,
-    'PI Ref. Number',
-    '1234567898765MAN',
-    Color(0xFF7C3AED),
-  ),
-  const _InspectionRow(
-    Icons.description,
-    'Policy Number',
-    '1234 5678 9012',
-    Color(0xFF16A34A),
-  ),
-];
+/// The case being inspected, from the saved owner & vehicle form and the
+/// server's PI Ref. Number. (No policy number row: the form never collects one.)
+List<_InspectionRow> _inspectionRows(WidgetRef ref) {
+  final flow = ref.watch(claimFlowProvider);
+  final d = flow.ownerVehicleDetails;
+  String orDash(String v) => v.isEmpty ? '-' : v;
+  // The insurer the signed-in agent works for (from the server), unless this
+  // build is tied to a branded insurer.
+  final insurer =
+      InsurerBranding.current.name ??
+      ref.watch(sessionProvider)?.user.organization ??
+      '';
+  return [
+    _InspectionRow(
+      Icons.business,
+      'Insurance Company',
+      orDash(insurer),
+      const Color(0xFF3B82F6),
+    ),
+    _InspectionRow(
+      Icons.person,
+      'Insured Name',
+      orDash(d.ownerName),
+      const Color(0xFF22C55E),
+    ),
+    _InspectionRow(
+      Icons.directions_car,
+      'Vehicle Number',
+      orDash(d.registrationNumber),
+      const Color(0xFFEF4444),
+    ),
+    _InspectionRow(
+      Icons.assignment,
+      'PI Ref. Number',
+      flow.inspectionId ?? '-',
+      const Color(0xFF7C3AED),
+    ),
+  ];
+}
 
 class _Instruction {
   const _Instruction(this.icon, this.title, this.desc, this.color, this.bg);
@@ -101,14 +111,15 @@ const _instructions = [
 ];
 
 /// Port of `InspectionDetailsPage.jsx`.
-class InspectionDetailsPage extends StatefulWidget {
+class InspectionDetailsPage extends ConsumerStatefulWidget {
   const InspectionDetailsPage({super.key});
 
   @override
-  State<InspectionDetailsPage> createState() => _InspectionDetailsPageState();
+  ConsumerState<InspectionDetailsPage> createState() =>
+      _InspectionDetailsPageState();
 }
 
-class _InspectionDetailsPageState extends State<InspectionDetailsPage> {
+class _InspectionDetailsPageState extends ConsumerState<InspectionDetailsPage> {
   bool _showLocation = false;
   bool _showRotate = false;
 
@@ -127,6 +138,7 @@ class _InspectionDetailsPageState extends State<InspectionDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final inspectionData = _inspectionRows(ref);
     return Scaffold(
       body: Stack(
         children: [
@@ -157,11 +169,11 @@ class _InspectionDetailsPageState extends State<InspectionDetailsPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Column(
                         children: [
-                          for (var i = 0; i < _inspectionData.length; i++)
+                          for (var i = 0; i < inspectionData.length; i++)
                             Container(
                               padding: const EdgeInsets.symmetric(vertical: 6),
                               decoration: BoxDecoration(
-                                border: i < _inspectionData.length - 1
+                                border: i < inspectionData.length - 1
                                     ? const Border(
                                         bottom: BorderSide(
                                           color: AppColors.borderInput,
@@ -176,24 +188,24 @@ class _InspectionDetailsPageState extends State<InspectionDetailsPage> {
                                     height: 32,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: _inspectionData[i].iconBg
+                                      color: inspectionData[i].iconBg
                                           .withValues(alpha: 0.13),
                                       border: Border.all(
-                                        color: _inspectionData[i].iconBg,
+                                        color: inspectionData[i].iconBg,
                                         width: 1.5,
                                       ),
                                     ),
                                     child: Icon(
-                                      _inspectionData[i].icon,
+                                      inspectionData[i].icon,
                                       size: 18,
-                                      color: _inspectionData[i].iconBg,
+                                      color: inspectionData[i].iconBg,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
                                   SizedBox(
                                     width: 128,
                                     child: Text(
-                                      _inspectionData[i].label,
+                                      inspectionData[i].label,
                                       style: const TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w600,
@@ -204,7 +216,7 @@ class _InspectionDetailsPageState extends State<InspectionDetailsPage> {
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      _inspectionData[i].value,
+                                      inspectionData[i].value,
                                       style: const TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w500,

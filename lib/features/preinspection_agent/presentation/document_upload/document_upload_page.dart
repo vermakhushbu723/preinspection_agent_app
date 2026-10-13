@@ -134,24 +134,37 @@ class _DocumentUploadPageState extends ConsumerState<DocumentUploadPage> {
       docName: doc.label,
       mode: doc.mode,
       source: source,
+      // Each image is uploaded under its own slot (e.g. rc_front, others_2);
+      // taking the same side again replaces it on the server.
       onSaveSides: (sides) async {
         for (final entry in sides.entries) {
-          final saved = await _mediaStorage.savePhoto(
-            '${doc.id}_${entry.key}',
-            entry.value,
-          );
-          ref.read(claimFlowProvider.notifier).addDocumentUpload(doc.id, saved);
+          final slot = '${doc.id}_${entry.key}';
+          final saved = await _mediaStorage.savePhoto(slot, entry.value);
+          ref
+              .read(claimFlowProvider.notifier)
+              .addDocumentUpload(doc.id, saved, slot: slot);
         }
       },
       onSaveMulti: (name, paths) async {
+        final start =
+            ref.read(claimFlowProvider).documentUploads[doc.id]?.length ?? 0;
         final saved = <String>[];
         for (final p in paths) {
           saved.add(
-            await _mediaStorage.savePhoto('${doc.id}_${saved.length}', p),
+            await _mediaStorage.savePhoto(
+              '${doc.id}_${start + saved.length}',
+              p,
+            ),
           );
         }
-        for (final s in saved) {
-          ref.read(claimFlowProvider.notifier).addDocumentUpload(doc.id, s);
+        for (var i = 0; i < saved.length; i++) {
+          ref
+              .read(claimFlowProvider.notifier)
+              .addDocumentUpload(
+                doc.id,
+                saved[i],
+                slot: '${doc.id}_${start + i}',
+              );
         }
         if (doc.isOther) {
           setState(() {
